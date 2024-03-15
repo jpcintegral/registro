@@ -28,6 +28,8 @@ import LocationOn from "@material-ui/icons/LocationOn";
 import DashboardPage from "views/Dashboard/Dashboard.js";
 import UserProfile from "views/UserProfile/UserProfile.js";
 import TableList from "views/TableList/TableList.js";
+import UserSystems from "views/UserSystems/UserSystems.js";
+import UserForm from "views/UserSystems/UserForm.js";
 //import Typography from "views/Typography/Typography.js";
 import Icons from "views/Icons/Icons.js";
 import Maps from "views/Maps/Maps.js";
@@ -43,6 +45,22 @@ const dashboardRoutes = [
     rtlName: "لوحة القيادة",
     icon: Dashboard,
     component: DashboardPage,
+    layout: "/admin",
+  },
+  {
+    path: "/UserSystems",
+    name: "Usuarios",
+    rtlName: "الرموز",
+    icon: Person,
+    component: UserSystems,
+    layout: "/admin",
+  },
+  {
+    path: "/UserForm/:userId?",
+    name: "Nuevo usuario",
+    rtlName: "الرموز",
+    icon: Person,
+    component: UserForm,
     layout: "/admin",
   },
   {

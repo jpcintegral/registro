@@ -4,6 +4,8 @@ import SignInSide from "views/SignInSide/SignInSide.js"
 // core components
 import Admin from "layouts/Admin.js";
 import RTL from "layouts/RTL.js";
+import UserSystems from "views/UserSystems/UserSystems.js";
+import UserForm from "views/UserSystems/UserForm.js";
 import "assets/css/material-dashboard-react.css?v=1.10.0";
 
 export default function App() {
@@ -21,7 +23,9 @@ export default function App() {
       <Switch>
         {!loggedIn && <Route path="/" render={() => <SignInSide handleLogin={handleLogin} />} />}
         {loggedIn && <Route path="/admin" component={Admin} />}
-        {loggedIn &&<Route path="/rtl" component={RTL} />}
+        {loggedIn && <Route path="/rtl" component={RTL} />}
+        {loggedIn && <Route path="/UserSystems" component={UserSystems} />} {/* Agrega esta línea */}
+        {loggedIn && <Route path="/UserForm/:userId?" component={UserForm} />}
         <Redirect from="/" to="/admin/dashboard" />
       </Switch>
     </BrowserRouter>
