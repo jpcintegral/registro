@@ -26,7 +26,9 @@ export default function CustomDropdown(props) {
     success,
     rtlActive,
     children,
-    onChange, // Agrega la prop onChange
+    onChange,
+    name, // Añade el prop name
+    value, // Agrega el prop value
   } = props;
 
   const labelClasses = classNames({
@@ -40,7 +42,6 @@ export default function CustomDropdown(props) {
   });
 
   const handleSelectChange = (event) => {
-    // Llama a la función onChange si está definida
     if (typeof onChange === "function") {
       onChange(event);
     }
@@ -66,8 +67,10 @@ export default function CustomDropdown(props) {
           disabled: classes.disabled,
         }}
         id={id}
+        name={name} // Agrega el prop name al componente Select
+        value={value || ""}
         {...selectProps}
-        onChange={handleSelectChange} // Agrega el evento onChange
+        onChange={handleSelectChange}
       >
         {children}
       </Select>
@@ -90,5 +93,7 @@ CustomDropdown.propTypes = {
   success: PropTypes.bool,
   rtlActive: PropTypes.bool,
   children: PropTypes.node,
-  onChange: PropTypes.func, // Asegúrate de agregar la prop onChange
+  onChange: PropTypes.func,
+  name: PropTypes.string, // Asegúrate de agregar el prop name a PropTypes
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
