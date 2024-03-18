@@ -25,7 +25,8 @@ const Login = async (usuario, password) => {
     // Paso 3: Verificar si la API devuelve un perfil
     if (response.data.perfil) {
       // Crear cookie con tiempo de vida de 1 hora
-      document.cookie = `token=${ jwt.sign({data:response.data}, key, { expiresIn: '1h' }) }; max-age=3600;`;
+      //document.cookie = `token=${ jwt.sign({data:response.data}, key, { expiresIn: '1h' }) }; max-age=3600;`;
+      document.cookie = `token=${ jwt.sign({data:response.data}, key, { expiresIn: '60s' }) }; max-age=60s;`;
       return true; // Devolver true si las credenciales son correctas
     } else {
       return false; // Devolver false si las credenciales son incorrectas
