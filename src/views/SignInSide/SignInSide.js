@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,6 +14,7 @@ import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import fondo from "assets/img/riult.jpg";
+import Snackbar from "components/Snackbar/Snackbar.js";
 
 
 {/*function Copyright(props) {
@@ -32,16 +33,42 @@ import fondo from "assets/img/riult.jpg";
 const defaultTheme = createTheme();
 
 export default function SignInSide(props) {
-  const handleSubmit = (event) => {
+  const [mensaje, setMensaje] = useState(null);
+  const [bc, setBC] = useState(false);
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get("email"),
       password: data.get("password"),
     });
-    props.handleLogin( data.get("email"), data.get("password")); 
+    const isLogin = await props.handleLogin( data.get("email"), data.get("password")); 
+    if (!isLogin) {
+      showNotification("bc",'datos incorrectos'); // Mostrar la notificación si el inicio de sesión falla
+    }
   };
 
+  const showNotification = (place, message) => {
+    setMensaje(message);
+    // Mostrar la notificación en el lugar especificado
+    switch (place) {
+      case "bc":
+        showBottomCenterNotification(message);
+        break;
+      // Agrega más casos según sea necesario para otros lugares
+      default:
+        break;
+    }
+  };
+
+  const showBottomCenterNotification = (message) => {
+    // Mostrar la notificación en la parte inferior central
+    console.log(message);
+    setBC(true);
+    setTimeout(() => {
+      setBC(false);     
+    }, 6000);
+  };
   return (
     <ThemeProvider theme={defaultTheme}>
       <Grid container component="main" sx={{ height: "100vh" }}>
@@ -142,6 +169,14 @@ export default function SignInSide(props) {
           </Box>
         </Grid>
       </Grid>
+      <Snackbar
+        place="br"
+        color="danger"
+        message={mensaje}
+        open={bc}
+        closeNotification={() => setBC(false)}
+        close
+      />
     </ThemeProvider>
   );
 }

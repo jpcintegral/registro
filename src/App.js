@@ -9,12 +9,16 @@ import UserForm from "views/UserSystems/UserForm.js";
 import "assets/css/material-dashboard-react.css?v=1.10.0";
 import jwt from "jsonwebtoken";
 import Login from 'views/SignInSide/Login.js';
+import Snackbar from "components/Snackbar/Snackbar.js";
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(null);
-
-  useEffect(() => {
+  const [bc, setBC] = useState(false);
+  const [mensaje, setMensaje] = useState(null);
+ 
+ let  showMensajeExpira=true;
+    useEffect(() => {
     // Verificar si existe la cookie token y el token
     checkCookie();
     // Ejecutar la validación de la cookie y el token cada 10 segundos
@@ -38,9 +42,14 @@ export default function App() {
         const timeRemaining = expirationTime - currentTime;
         setTimeRemaining(timeRemaining);
         // Si el tiempo restante es menor o igual a 15000 ms (15 segundos), mostrar el modal
-        if (timeRemaining <= 30000) {
+        console.log("showMensajeExpira:",showMensajeExpira);
+        if (timeRemaining <= 30000 && timeRemaining >0 && showMensajeExpira) {
           console.log("timeRemaining",timeRemaining);
+          showMensajeExpira=false;
           setShowModal(true);
+          showNotification("bc", `La sesión expirará en ${Math.ceil(timeRemaining / 1000)} segundos`);
+          
+          
         }
         // Si el token es válido y el tiempo restante es mayor a 0, establecer loggedIn como verdadero
         if (timeRemaining > 0) {
@@ -49,6 +58,7 @@ export default function App() {
           // Si el tiempo ha expirado, eliminar la cookie y establecer loggedIn como falso
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
           setLoggedIn(false);
+         
         }
       } catch (error) {
         console.error("Error al decodificar el token:", error);
@@ -91,7 +101,29 @@ export default function App() {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setLoggedIn(false);
   };
+  const showNotification = (place, message) => {
+    setMensaje(message);
+    // Mostrar la notificación en el lugar especificado
+    switch (place) {
+      case "bc":
+        showBottomCenterNotification(message);
+        break;
+      // Agrega más casos según sea necesario para otros lugares
+      default:
+        break;
+    }
+  };
 
+  const showBottomCenterNotification = (message) => {
+    // Mostrar la notificación en la parte inferior central
+    console.log(message);
+    setBC(true);
+    setTimeout(() => {
+      setBC(false);     
+    }, 6000);
+  };
+
+ 
   return (
     <BrowserRouter>
       <Switch>
@@ -111,6 +143,14 @@ export default function App() {
         )}
         <Redirect from="/" to="/admin/dashboard" />
       </Switch>
+      <Snackbar
+        place="bc"
+        color="info"
+        message={mensaje}
+        open={bc}
+        closeNotification={() => setBC(false)}
+        close
+      />
     </BrowserRouter>
   );
 }
