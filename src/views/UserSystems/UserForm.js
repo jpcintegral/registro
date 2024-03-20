@@ -74,7 +74,7 @@ export default function UserForm() {
               // Establece el estado formData con los datos temporales
               setFormData(tempData);
               const Municipios = cargarMunicipios(userData.estado);
-               setMunicipios(Municipios);
+              setMunicipios(Municipios);
               setLoading(false);
 
             })
@@ -107,6 +107,7 @@ export default function UserForm() {
          // Llamar a la función para cargar los estados
          cargarEstados();     
          setPerfil(1);
+         
       }, [userId]);
       
     const handleInputChange = (e) => {
@@ -209,6 +210,16 @@ async function cargarMunicipios(idEstado) {
         handleInputChange(event); // Llama a la segunda función
       };
       
+      const handleDateChange = (date) => {
+           // Crear el objeto con el nombre y el valor
+      const dateObj = {
+        target: {
+          name: "fechaNacimiento",
+          value: date,
+        },
+      };
+        handleInputChange(dateObj);
+      };
   return (
     <div>
       <GridContainer>
@@ -382,18 +393,19 @@ async function cargarMunicipios(idEstado) {
                     />
                   </GridItem>
                   <GridItem xs={12} sm={12} md={4}>
-                    <CustomDate
-                      labelText="Fecha de Nacimiento"
-                      name="fechaNacimiento"
-                      selectedDate={formData.fechaNacimiento}
-                      onChange={(date) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          fechaNacimiento: date,
-                        }))
-                      }
-                      formControlProps={{ fullWidth: true }}
-                    />
+                  <CustomDate
+                    labelText="Fecha de nacimiento"
+                    id="fechaNacimiento"
+                    name="fechaNacimiento"
+                    formControlProps={{
+                      fullWidth: true,
+                    }}
+                    error={false}
+                    success={false}
+                    rtlActive={false}
+                    selectedDate={  formData.fechaNacimiento }
+                    onDateChange={handleDateChange}
+                  />
                   </GridItem>
                 </GridContainer>
                 <Button color="primary" type="submit">

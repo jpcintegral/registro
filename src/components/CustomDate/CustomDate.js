@@ -47,7 +47,7 @@ export default function CustomDate(props) {
           margin="normal"
           label={labelText}
           format="MM/dd/yyyy"
-          value={selectedDate}
+          value={selectedDate instanceof Date ? selectedDate : new Date(selectedDate)}
           onChange={handleDateChange}
           KeyboardButtonProps={{
             'aria-label': 'change date',
@@ -72,6 +72,9 @@ CustomDate.propTypes = {
   error: PropTypes.bool,
   success: PropTypes.bool,
   rtlActive: PropTypes.bool,
-  selectedDate: PropTypes.instanceOf(Date),
+  selectedDate: PropTypes.oneOfType([
+    PropTypes.instanceOf(Date),
+    PropTypes.string,
+  ]),
   onDateChange: PropTypes.func,
 };

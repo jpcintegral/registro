@@ -87,7 +87,7 @@ export default function UserSystems() {
 
   const handleDelete = async (userId) => {
     try {
-      await axios.delete(`http://localhost:3800/api/user/${userId}`);
+      await axios.put(`http://localhost:3800/api/user/desactivar/${userId}`);
       const updatedUsers = users.filter(user => user._id !== userId);
       setUsers(updatedUsers);
     } catch (error) {

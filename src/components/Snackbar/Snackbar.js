@@ -63,7 +63,7 @@ export default function Snackbar(props) {
 }
 
 Snackbar.propTypes = {
-  message: PropTypes.node.isRequired,
+  message: PropTypes.node,
   color: PropTypes.oneOf(["info", "success", "warning", "danger", "primary"]),
   close: PropTypes.bool,
   icon: PropTypes.object,
