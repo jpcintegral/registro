@@ -26,7 +26,8 @@ import LocationOn from "@material-ui/icons/LocationOn";
 //import Language from "@material-ui/icons/Language";
 // core components/views for Admin layout
 import DashboardPage from "views/Dashboard/Dashboard.js";
-import UserProfile from "views/UserProfile/UserProfile.js";
+import Simpatizantes from "views/Simpatizante/Simpatizantes.js";
+import Simpatizante  from "views/Simpatizante/Simpatizante.js";
 import TableList from "views/TableList/TableList.js";
 import UserSystems from "views/UserSystems/UserSystems.js";
 import UserForm from "views/UserSystems/UserForm.js";
@@ -51,24 +52,32 @@ const dashboardRoutes = [
     path: "/UserSystems",
     name: "Usuarios",
     rtlName: "الرموز",
-    icon: Person,
+    icon: "content_paste",
     component: UserSystems,
     layout: "/admin",
   },
   {
     path: "/UserForm/:userId?",
-    name: "Nuevo usuario",
+    name: "Usuario",
     rtlName: "الرموز",
     icon: Person,
     component: UserForm,
     layout: "/admin",
   },
   {
-    path: "/user",
-    name: "AFILIADO",
+    path: "/Simpatizantes",
+    name: "Simpatizantes",
+    rtlName: "ملف تعريفي للمستخدم",
+    icon: "content_paste",
+    component: Simpatizantes,
+    layout: "/admin",
+  },
+  {
+    path: "/Simpatizante/:userId?",
+    name: "Simpatizante",
     rtlName: "ملف تعريفي للمستخدم",
     icon: Person,
-    component: UserProfile,
+    component: Simpatizante,
     layout: "/admin",
   },
   {
