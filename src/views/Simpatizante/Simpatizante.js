@@ -127,22 +127,9 @@ export default function Simpatizante() {
         cargarEstados();     
         setPerfil(1);
          console.log(perfil);
-
-         const newMarkersData = [
-          {
-            nombre: "jose pastor",
-            edad: 46,
-            state: "colima",
-            municipality: "colima",
-            neighborhood: 'la armonia',
-            postalCode: "28020",
-            street: 'independencia',
-            number: '271',
-          }
-          // Resto de los objetos del markersData...
-        ];
-        setMarkersData(newMarkersData);
-      }, [city, state, postalCode]);
+         utpdateMapa();
+        
+      }, []);
 
 
   // Método para insertar un nuevo simpatizante
@@ -185,7 +172,23 @@ async function cargarMunicipios(idEstado) {
     console.error('Error al cargar los estados:', error);
   }
 }
+ function utpdateMapa(){
+  const newMarkersData = [
+    {
+      nombre: "jose pastor",
+      edad: 46,
+      state: state ? state : "colima",
+      municipality: city ? city : "colima",
+      neighborhood: formData.colonia ? formData.colonia : 'la armonia',
+      postalCode: postalCode ? postalCode: "28020",
+      street: formData.calle ? formData.calle : 'independencia',
+      number: formData.numeroCalle ? formData.numeroCalle : '271',
+    }
+    // Resto de los objetos del markersData...
+  ];
+  setMarkersData(newMarkersData);
 
+ }
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
@@ -207,15 +210,17 @@ const handleSubmit = async (e) => {
  
 const handlestateChange = (event) => {
   if(event.target.value){
+
    const obtenerMunicipios = cargarMunicipios(event.target.value);
    setMunicipios(obtenerMunicipios);
-   setState(event.target.value);
+   const nombreEstado= estados.find((etd)=> etd.idEstado==event.target.value).nombre;
+   setState(nombreEstado);
+   utpdateMapa()
   }
   console.log("estado"+event.target.value);
 };
 
 const handleDropdownChanEstado = (event) => {
-  console.log(event)
   handlestateChange(event); // Llama a la primera función
   handleInputChange(event); // Llama a la segunda función
 };
@@ -240,13 +245,16 @@ const handleInputChange = (e) => {
   const classes = useStyles();
   const handlePostalCodeChange = (event) => {
     setPostalCode(event.target.value);
+    utpdateMapa();
     handleInputChange(event);
-    console.log("codigo postal");
+    console.log("codigo postal",event.target.value);
   };
   
   const handleCityChange  = (event) => {
-    setCity(event.target.value);
-     console.log("city");
+    const nombreMunicipio= municipio.find((mcp)=> mcp.idMunicipio==event.target.value).nombre;
+    setCity(nombreMunicipio);
+    utpdateMapa();
+    console.log("nombreMunicipio",nombreMunicipio);
   };
   const handleDateChange = (date) => {
     setStartDate(date);
@@ -372,7 +380,7 @@ const handleInputChange = (e) => {
                       formControlProps={{ fullWidth: true }}
                       value={estados.length > 0 && formData.estado ? formData.estado : ''}
                       onChange={handleDropdownChanEstado} // Llama a la función que invoca ambas funciones
-                    >
+                                          >
                       {estados.length > 0 && estados.map((estado) => (
                       <option key={estado.idEstado } value={estado.idEstado } >
                         {estado.nombre}
