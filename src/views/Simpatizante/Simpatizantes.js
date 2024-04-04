@@ -9,6 +9,12 @@ import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import { useHistory } from 'react-router-dom';
 import axios from "axios";
+import * as XLSX from 'xlsx';
+import CustomInput from "components/CustomInput/CustomInput.js";
+import Modal from "components/Modal/Modal.js";
+import CardAvatar from "components/Card/CardAvatar.js";
+import avatar from "assets/img/faces/jpc.jpg";
+
 
 const styles = {
   cardCategoryWhite: {
@@ -47,22 +53,57 @@ export default function Simpatizantes() {
   const history = useHistory();
   const classes = useStyles();
   const [simpatizantes, setSimpatizantes] = useState([]);
+  const [municipiosList,setMunicipiosList] = useState(null);
+  const [estadosList,setEstadosList] =useState(null);
+  const [loading, setLoading] = useState(false);
+  const [filterValue, setFilterValue] = useState('');
+  const [openModal, setOpenModal] = useState(false);
+  const [detalleUsuario,setDetalleUsuario]=useState(null);
 
   const fetchSimpatizantes = async () => {
     try {
       const response = await axios.get("http://localhost:3800/api/simpatizantes");
       setSimpatizantes(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching simpatizantes:", error);
     }
   };
 
+   const getEstados = async () =>{
+    try {
+      const responseEstados= await axios.get("http://localhost:3800/api/estados");
+      setEstadosList(responseEstados.data);
+    } catch(error) {
+      console.error("Errro get estados:", error);
+    }
+   }
+
+   const getMunicipos = async () =>{
+    try {
+      const responseMunicipios= await axios.get("http://localhost:3800/api/municipios");
+      setMunicipiosList(responseMunicipios.data);
+    } catch(error) {
+      console.error("Errro get estados:", error);
+    }
+   }
+
   useEffect(() => {
     fetchSimpatizantes();
+    getEstados();
+    getMunicipos();
   }, []);
-
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
   const handleDetail = (simpatizanteId) => {
     console.log(simpatizanteId); // Lógica para mostrar detalles del simpatizante
+    const detalleUsuario = simpatizantes.find(user => user._id === simpatizanteId);
+    setDetalleUsuario(detalleUsuario);
+    handleOpenModal();
   };
 
   const handleUpdate = (simpatizanteId) => {
@@ -75,11 +116,12 @@ export default function Simpatizantes() {
       await axios.put(`http://localhost:3800/api/simpatizantes/desactivar/${simpatizanteId}`);
       const updatedSimpatizantes = simpatizantes.filter(simpatizante => simpatizante._id !== simpatizanteId);
       setSimpatizantes(updatedSimpatizantes);
+     
     } catch (error) {
       console.error("Error deleting simpatizante:", error);
     }
   };
-
+  
   const estatusMap = {
     "1": "Activo",
     "2": "Inactivo"
@@ -89,7 +131,54 @@ export default function Simpatizantes() {
     "2": "Mujer",
     "3": "Otro"
     }
-  return (
+
+    function getNombreMunicipio(idMunicipio) {
+       console.log("municipiosList",municipiosList);
+      if (municipiosList && municipiosList.length > 0) {
+        const municipioEncontrado = municipiosList.find((mcp) => mcp.idMunicipio === idMunicipio);
+        return municipioEncontrado ? municipioEncontrado.nombre : "";
+      }
+      return "";
+    }
+    function getNombreEstado(idEstado) {
+      if (estadosList && estadosList.length > 0) {
+        const estadoEncontrado = estadosList.find((est) => est.idEstado === idEstado);
+        return estadoEncontrado ? estadoEncontrado.nombre : "";
+      }
+      return "";
+    }
+
+    const exportToExcelFilter = (data) => {
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Simpatizantes");
+      XLSX.writeFile(wb, "simpatizantesTabla.xlsx");
+    };
+
+    const exportToExcelBase = (data) => {
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Simpatizantes");
+      XLSX.writeFile(wb, "simpatizantesBase.xlsx");
+    };
+    const filteredSimpatizantes = simpatizantes.filter(simpatizante =>
+      Object.values(simpatizante).some(field =>
+        String(field).toLowerCase().includes(filterValue.toLowerCase())
+      )
+    );
+  
+    const printUserDetailToPDF = () => {
+        // Verifica la documentación de la librería jsPDF para obtener más detalles: https://github.com/MrRio/jsPDF
+      window.print();
+    };
+    const handleFilterChange = (e) => {
+      setFilterValue(e.target.value);
+    };
+    if(loading || !estadosList || !municipiosList){
+      console.log(loading);
+      return "<CircularProgress />";
+   }
+  return ( 
     <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
         <Card>
@@ -98,8 +187,24 @@ export default function Simpatizantes() {
             <p className={classes.cardCategoryWhite}>
               Lista de simpatizantes registrados.
             </p>
+            <p >
+            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}>Descargar Tabla</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}>Descargar Base</Button>
+            </p>
+          
           </CardHeader>
           <CardBody>
+          <div style={{ marginBottom: '10px',float: 'inline-end' }}>
+               <CustomInput
+                    labelText="Filtrar"
+                    id="Filtrar"
+                    name="Filtrar"
+                    inputProps={{ 'value': filterValue, onChange: handleFilterChange }}
+                    formControlProps={{
+                      fullWidth: false,
+                    }}
+                  />
+            </div>
             <Table
               tableHeaderColor="info"
               tableHead={[
@@ -118,15 +223,15 @@ export default function Simpatizantes() {
                 "Estatus",
                 "Acciones"
               ]}
-              tableData={simpatizantes.map((simpatizante) => [
+              tableData={filteredSimpatizantes.map((simpatizante) => [
                 simpatizante.nombre,
                 simpatizante.apellidoPaterno,
                 simpatizante.apellidoMaterno,
                 simpatizante.genero && generoMap[simpatizante.genero],
                 simpatizante.email,
                 simpatizante.fechaNacimiento ? new Date(simpatizante.fechaNacimiento).toLocaleDateString('es-MX') : '',
-                simpatizante.estado,
-                simpatizante.municipio,
+                getNombreEstado(simpatizante.estado),
+                getNombreMunicipio(simpatizante.municipio),
                 simpatizante.codigoPostal,
                 simpatizante.colonia,
                 simpatizante.calle,
@@ -143,6 +248,41 @@ export default function Simpatizantes() {
           </CardBody>
         </Card>
       </GridItem>
+      <Modal open={openModal} onClose={handleCloseModal} title="Detalle">
+      <GridItem xs={12} sm={12} md={12}>
+          <Card profile>
+            <CardAvatar profile>
+              <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                <img src={avatar} alt="..." />
+              </a>
+            </CardAvatar>
+            <CardBody profile >
+              {detalleUsuario && (
+              <React.Fragment>
+                <div className="card-container">
+                <h6 className="card-title">
+                  {detalleUsuario.nombre} {detalleUsuario.apellidoPaterno} {detalleUsuario.apellidoMaterno}
+                </h6>
+                <p className="description">Email: {detalleUsuario.email}</p>
+                <p className="description">Teléfono: {detalleUsuario.telefono}</p>
+                <p className="description">Fecha de Nacimiento: {detalleUsuario.fechaNacimiento}</p>
+                <p className="description">Estado: {getNombreEstado(detalleUsuario.estado)}</p>
+                <p className="description">Municipio: {getNombreMunicipio(detalleUsuario.municipio)}</p>
+                <p className="description">Código Postal: {detalleUsuario.codigoPostal}</p>
+                <p className="description">Colonia: {detalleUsuario.colonia}</p>
+                <p className="description">Comentario Personal: {detalleUsuario.comentarioPersonal}</p>
+                </div>
+              </React.Fragment>
+            )}
+        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF}>
+          Imprimir
+        </Button>
+             
+            </CardBody>
+          </Card>
+           
+        </GridItem>
+      </Modal>
     </GridContainer>
   );
 }

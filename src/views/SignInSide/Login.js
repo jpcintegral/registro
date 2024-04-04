@@ -10,7 +10,7 @@ const Login = async (usuario, password) => {
         email: usuario,
         password
       }
-       const key = 'jp152024'; //process.env.SECRET_KEY;
+      const key = process.env.REACT_APP_SECRET_KEY;
       console.log("Data: "+ JSON.stringify(data));
         
         const token = jwt.sign(data, key, { expiresIn: '1h' });
