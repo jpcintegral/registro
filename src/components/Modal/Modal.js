@@ -14,10 +14,12 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
     borderRadius: "8px",
+    maxHeight: "80vh", // Altura máxima del modal
+    overflowY: "auto", // Hace que el contenido sea desplazable verticalmente si excede la altura máxima
   },
 }));
 
-const Modal = ({ open, onClose, children, title }) => {
+const Modal = ({ open, onClose, children, title ,nota}) => {
   const classes = useStyles();
 
   return (
@@ -33,7 +35,9 @@ const Modal = ({ open, onClose, children, title }) => {
     >
       <Fade in={open}>
         <div className={classes.paper}>
-          <h2>{title}</h2>
+          <h4>{title}</h4>
+          <p>{nota}</p>
+          <hr/>
           {children}
         </div>
       </Fade>
@@ -46,6 +50,7 @@ Modal.propTypes = {
   onClose: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,
   title: PropTypes.string.isRequired,
+  nota : PropTypes.string,
 };
 
 export default Modal;
