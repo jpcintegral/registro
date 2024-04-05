@@ -2,6 +2,8 @@ import React,{ useEffect,useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
+
+import { List, ListItem, Checkbox, ListItemText } from "@material-ui/core"
 //import InputLabel from "@material-ui/core/InputLabel";
 // core components
 import GridItem from "components/Grid/GridItem.js";
@@ -14,12 +16,14 @@ import CustomDate from "components/CustomDate/CustomDate.js";
 import Button from "components/CustomButtons/Button.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
-import CardAvatar from "components/Card/CardAvatar.js";
+//import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
-import avatar from "assets/img/faces/jpc.jpg";
+//import avatar from "assets/img/faces/jpc.jpg";
 import Map from "../Maps/Maps.js";
 import axios from "axios";
+import OCRSpace from "helpers/OCRSpace.js";
+import Modal from "components/Modal/Modal.js";
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -52,9 +56,13 @@ export default function Simpatizante() {
   const [loading, setLoading] = useState(false);
   const [municipio, setMunicipios] = useState([]);
   const [estados, setestados] = useState([]);
+  const [image, setImage] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
   
   const { userId } = useParams();
   const [perfil, setPerfil] = useState(1);
+  const [formDataImg, setFormDataImg] = useState(null);
+  const [checkedFields, setCheckedFields] = useState([]);
   const [formData, setFormData] = useState({
     nombre: "",
     apellidoPaterno: "",
@@ -129,7 +137,7 @@ export default function Simpatizante() {
          console.log(perfil);
          utpdateMapa();
         
-      }, []);
+      }, [formDataImg,formData]);
 
 
   // Método para insertar un nuevo simpatizante
@@ -283,6 +291,99 @@ const handleInputChange = (e) => {
     console.log("updatedMarkersData:",updatedMarkersData);
   };
 
+  const handleImageChange = async (e) => {
+    
+    const file = e.target.files[0];
+    setImage(null);
+    setImage(URL.createObjectURL(file));
+    const ocrs = await OCRSpace(file);
+    setFormDataImg(ocrs);
+    handleOpenModal();
+    e.target.value = null;
+  };
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  
+   // Renderiza la lista de checkboxes
+   const renderCheckboxes = () => {
+    if (!formDataImg) return null; // Si no hay detalles de usuario, no renderiza nada
+  
+    const keys = Object.keys(formDataImg);
+    const middleIndex = Math.ceil(keys.length / 2);
+    const leftKeys = keys.slice(0, middleIndex);
+    const rightKeys = keys.slice(middleIndex);
+  
+    return (
+      <GridItem container spacing={2}>
+        <GridItem item xs={6}>
+          <List>
+            {leftKeys.map((key) => (
+              <ListItem key={key}>
+                <Checkbox
+                  checked={checkedFields[key] || false} // Estado del checkbox
+                  onChange={handleCheckboxChange}
+                  value={key}
+                />
+                <ListItemText primary={`Campo: ${key}`} secondary={`Texto: ${formDataImg[key]}`} />
+              </ListItem>
+            ))}
+          </List>
+        </GridItem>
+        <GridItem item xs={6}>
+          <List>
+            {rightKeys.map((key) => (
+              <ListItem key={key}>
+                <Checkbox
+                  checked={checkedFields[key] || false} // Estado del checkbox
+                  onChange={handleCheckboxChange}
+                  value={key}
+                />
+                <ListItemText primary={`Campo: ${key}`} secondary={`Texto: ${formDataImg[key]}`} />
+              </ListItem>
+            ))}
+          </List>
+        </GridItem>
+      </GridItem>
+    );
+  };
+  const handleCheckboxChange = (event) => {
+   const { value, checked } = event.target; 
+try {
+ 
+  setCheckedFields((prevCheckedFields) => ({
+    ...prevCheckedFields,
+    [value]: checked
+  }));
+  }catch(error){
+  console.log("error al marcar los campos de la credencial", error);
+  }
+   
+  };
+
+
+  const handleCheckboxVerification = () => {
+      // Verificar los checkboxes marcados y actualizar formData si es necesario
+  Object.keys(checkedFields).forEach((field) => {
+    if (checkedFields[field] && field in formDataImg) {
+      // Verificar si el campo está marcado y existe en formDataImg
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [field]: formDataImg[field] // Actualizar el valor del campo con el valor de formDataImg
+      }));
+    }
+  });
+
+    // Cerrar el modal después de la verificación
+    handleCloseModal();
+  };
+
+
   if(loading && formData.nombre){
     return "<CircularProgress />";
  }
@@ -296,6 +397,11 @@ const handleInputChange = (e) => {
             <CardHeader color="info">
               <h4 className={classes.cardTitleWhite}>Simpatizante</h4>
               <p className={classes.cardCategoryWhite}>Nuevo simpatizante</p>
+              <div style={{ marginBottom: '10px',float: 'inline-end' }}>
+              <Button type="file" onChange={handleImageChange} accept="image/*" color="primary" size="sm" >Credencial (Frontal)</Button>
+              <Button color="primary" size="sm" >Credencial (Tracera))</Button>
+              <input  color="primary" size="sm" type="file" onChange={handleImageChange} accept="image/*" />
+                </div>
             </CardHeader>
             <form onSubmit={handleSubmit}>
             <CardBody>
@@ -305,7 +411,7 @@ const handleInputChange = (e) => {
                     labelText="NOMBRE"
                     id="nombre"
                     name="nombre"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.nombre, onChange: handleInputChange }}
+                    inputProps={{ value: formData.nombre || '', onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -316,7 +422,7 @@ const handleInputChange = (e) => {
                     labelText="APELLIDO PATERNO"
                     id="apellidoPaterno"
                     name="apellidoPaterno"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.apellidoPaterno, onChange: handleInputChange }}
+                    inputProps={{  value : formData.apellidoPaterno, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -327,7 +433,7 @@ const handleInputChange = (e) => {
                     labelText="APELLIDO MATERNO"
                     id="apellidoMaterno"
                     name="apellidoMaterno"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.apellidoMaterno, onChange: handleInputChange }}
+                    inputProps={{ value : formData.apellidoMaterno, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -357,7 +463,7 @@ const handleInputChange = (e) => {
                     <CustomInput
                       labelText="Teléfono"
                       name="telefono"
-                      inputProps={{  [userId ? 'defaultValue' : 'value']: formData.telefono, onChange: handleInputChange }}
+                      inputProps={{  value : formData.telefono, onChange: handleInputChange }}
                       formControlProps={{ fullWidth: true }}
                     />
                   </GridItem>
@@ -365,7 +471,7 @@ const handleInputChange = (e) => {
                     <CustomInput
                       labelText="Email"
                       name="email"
-                      inputProps={{  [userId ? 'defaultValue' : 'value']: formData.email, onChange: handleInputChange }}
+                      inputProps={{ value : formData.email, onChange: handleInputChange }}
                       formControlProps={{ fullWidth: true }}
                     />
                   </GridItem>                  
@@ -409,7 +515,7 @@ const handleInputChange = (e) => {
                     <CustomInput
                       labelText="Código Postal"
                       name="codigoPostal"
-                      inputProps={{  [userId ? 'defaultValue' : 'value']: formData.codigoPostal, onChange: handlePostalCodeChange }}
+                      inputProps={{ value : formData.codigoPostal, onChange: handlePostalCodeChange }}
                       formControlProps={{ fullWidth: true }}
                     />
                     
@@ -420,7 +526,7 @@ const handleInputChange = (e) => {
                    <CustomInput
                       labelText="Colonia"
                       name="colonia"
-                      inputProps={{  [userId ? 'defaultValue' : 'value']: formData.colonia, onChange: handleInputChange }}
+                      inputProps={{  value : formData.colonia, onChange: handleInputChange }}
                       formControlProps={{ fullWidth: true }}
                     />
                   </GridItem>
@@ -429,7 +535,7 @@ const handleInputChange = (e) => {
                     labelText="CALLE"
                     id="calle"
                     name="calle"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.calle, onChange: handleInputChange }}
+                    inputProps={{ value: formData.calle, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -440,7 +546,7 @@ const handleInputChange = (e) => {
                     labelText="NUMERO CALLE"
                     id="numeroCalle"
                     name="numeroCalle"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.numeroCalle, onChange: handleInputChange }}
+                    inputProps={{  value : formData.numeroCalle, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -453,7 +559,7 @@ const handleInputChange = (e) => {
                     labelText="SECCION"
                     id="seccion"
                     name="seccion"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.seccion, onChange: handleInputChange }}
+                    inputProps={{ value : formData.seccion, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -465,7 +571,7 @@ const handleInputChange = (e) => {
                     labelText="LOCALIDAD"
                     id="localidad"
                     name="localidad"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.localidad, onChange: handleInputChange }}
+                    inputProps={{  value : formData.localidad, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -476,7 +582,7 @@ const handleInputChange = (e) => {
                     labelText="CLAVE ELECTOR"
                     id="claveElector"
                     name="claveElector"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.claveElector, onChange: handleInputChange }}
+                    inputProps={{ value : formData.claveElector, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -489,7 +595,7 @@ const handleInputChange = (e) => {
                     labelText="FOLIO"
                     id="folio"
                     name="folio"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.folio, onChange: handleInputChange }}
+                    inputProps={{ value : formData.folio, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -500,7 +606,7 @@ const handleInputChange = (e) => {
                     labelText="VIGENCIA CREDENCIAL"
                     id="vigenciaCredencial"
                     name="vigenciaCredencial"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.vigenciaCredencial, onChange: handleInputChange }}
+                    inputProps={{ value : formData.vigenciaCredencial, onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -529,7 +635,7 @@ const handleInputChange = (e) => {
                     labelText="LATITUD"
                     id="lat"
                     name="lat"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']: formData.lat , onChange: handleInputChange }}
+                    inputProps={{ value : formData.lat , onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -540,7 +646,7 @@ const handleInputChange = (e) => {
                     labelText="LONGITUD"
                     id="lon"
                     name="lon"
-                    inputProps={{  [userId ? 'defaultValue' : 'value']:  formData.lon , onChange: handleInputChange }}
+                    inputProps={{ value : formData.lon , onChange: handleInputChange }}
                     formControlProps={{
                       fullWidth: true,
                     }}
@@ -557,7 +663,7 @@ const handleInputChange = (e) => {
                       fullWidth: true,
                     }}
                     inputProps={{
-                      [userId ? 'defaultValue' : 'value']: formData.comentarioPersonal, onChange: handleInputChange ,
+                      value : formData.comentarioPersonal, onChange: handleInputChange ,
                       multiline: true,
                       rows: 5,
                     }}
@@ -576,21 +682,9 @@ const handleInputChange = (e) => {
 
         <GridItem xs={12} sm={12} md={4}>
           <Card profile>
-            <CardAvatar profile>
-              <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                <img src={avatar} alt="..." />
-              </a>
-            </CardAvatar>
-            <CardBody profile>
-              <h6 className={classes.cardCategory}> SOFTWARE DEVELOPER</h6>
-              <h4 className={classes.cardTitle}>Alec Thompson</h4>
-              <p className={classes.description}>
-                Desarrollo, mantenimineto e implemnetacion de sistemas.
-              </p>
-              <Button color="primary" round>
-                Follow
-              </Button>
-            </CardBody>
+          <div className="img-container">
+           <img src={image} alt="Imagen" />
+          </div>
           </Card>
             <GridContainer>
                   <GridItem xs={12} sm={12} md={12}>
@@ -598,7 +692,28 @@ const handleInputChange = (e) => {
                   </GridItem>
             </GridContainer>
         </GridItem>
-      
+        <GridItem xs={12} sm={12} md={12}>
+        <Modal open={openModal} onClose={handleCloseModal} title="Detalle"
+        nota="Por favor, verifique que los datos escaneados sean correctos y seleccione los que corresponden a la credencial."
+        >
+        <GridItem xs={12} sm={12} md={12}>
+          {/* Aquí va el contenido del modal */}
+          <div className="card-container">
+          <div className="img-container">
+           <img src={image} alt="Imagen" />
+          </div>
+          </div>
+          {/* Renderiza la lista de checkboxes */}
+          {renderCheckboxes()}
+        </GridItem>
+        <GridItem xs={12}>
+        <Button color="primary" variant="contained" onClick={handleCheckboxVerification}>
+            Verificar y Actualizar
+          </Button>
+        </GridItem>
+        
+      </Modal>
+      </GridItem>
       </GridContainer>
 
       
