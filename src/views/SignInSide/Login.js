@@ -13,11 +13,8 @@ const Login = async (usuario, password) => {
       const key = process.env.REACT_APP_SECRET_KEY;
       console.log("Data: "+ JSON.stringify(data));
         
-        const token = jwt.sign(data, key, { expiresIn: '1h' });
-        console.log('Token generado con éxito:', token);
+      const token = jwt.sign(data, key, { expiresIn: '1h' });
      
-     // var token = jwt.sign({ usuario: 'jpastorcardenas', password: 'paj9012' }, 'jp152024', { algorithm: 'RS256' });
-
     // Paso 2: Consultar el login con el token JWT
     
      const response = await axios.post('http://localhost:3800/api/login',{token: token});
