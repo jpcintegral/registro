@@ -3,18 +3,19 @@ import axios from "axios";
 const OCRSpace = async (setFormDataImg ) => {
   
  var formData ={
-    nombre: "",
-    apellidoPaterno: "",
-    apellidoMaterno: "",
-    fechaNacimiento: null,
-    estado: "",
-    municipio: "",
-    colonia: "",
-    calle: "",
-    numeroCalle: "",
-    seccion: "",
-    codigoPostal: "",
-    claveElector: "",
+    nombre : "",
+    apellidoPaterno : "",
+    apellidoMaterno : "",
+    fechaNacimiento : null,
+    estado : "",
+    municipio : "",
+    colonia : "",
+    calle : "",
+    numeroCalle : "",
+    seccion : "",
+    codigoPostal : "",
+    claveElector : "",
+    curp : "",
     vigenciaCredencial: "",
     fechaRegistroIne: null,
   };
@@ -81,7 +82,8 @@ try {
         vigenciaCredencial: getVigenciaCredencial(lineas),
         fechaRegistroIne: getFechaRegistroIne(lineas),
         genero: getGenero(lineas),
-        seccion: getSeccion(lineas)
+        seccion: getSeccion(lineas),
+        curp: getCurp(lineas),
       };
     } catch (error) {
       console.log(error);
@@ -288,6 +290,31 @@ try {
       return "";
     }
   }
+
+
+      function getCurp(lineas) {
+        const curpIndex = lineas.findIndex(linea => linea.includes('CURP'));
+        if (curpIndex !== -1 && curpIndex < lineas.length) {
+            const curpLinea = lineas[curpIndex].trim();
+            if (curpLinea.startsWith('CURP')) {
+                const curpTexto = curpLinea.slice(4).trim();
+                if (curpTexto.length > 16) {
+                    return curpTexto;
+                } else {
+                    // Buscar en el resto de las líneas después de la línea donde se encontró la palabra 'CURP'
+                    for (let i = curpIndex + 1; i < lineas.length; i++) {
+                        if (lineas[i].trim().length > 16) {
+                            return lineas[i].trim();
+                        }
+                    }
+                }
+            } else if (curpLinea.length > 16) {
+                return curpLinea.trim();
+            }
+        }
+        return "";
+    }
+
 
   function getFechaRegistroIne(lineas) {
     try {

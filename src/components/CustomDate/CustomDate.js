@@ -46,7 +46,7 @@ export default function CustomDate(props) {
           id={id}
           margin="normal"
           label={labelText}
-          format="MM/dd/yyyy"
+          format="dd/MM/yyyy"
           value={selectedDate instanceof Date ? selectedDate : new Date(selectedDate)}
           onChange={handleDateChange}
           KeyboardButtonProps={{

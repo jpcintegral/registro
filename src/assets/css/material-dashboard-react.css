@@ -581,3 +581,7 @@ footer ul li a:hover {
   height: 100%; /* Se ajustará automáticamente para mantener la relación de aspecto */
   object-fit: cover; /* La imagen se ajustará para cubrir el contenedor sin distorsión */
 }
+
+.img-elector{
+  width:400px;
+}

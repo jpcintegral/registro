@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Modal = ({ open, onClose, children, title ,nota}) => {
+const Modal = ({ open, onClose, children, title ,nota,id}) => {
   const classes = useStyles();
 
   return (
@@ -34,7 +34,7 @@ const Modal = ({ open, onClose, children, title ,nota}) => {
       }}
     >
       <Fade in={open}>
-        <div className={classes.paper}>
+        <div id={id} className={classes.paper}>
           <h4>{title}</h4>
           <p>{nota}</p>
           <hr/>
@@ -51,6 +51,7 @@ Modal.propTypes = {
   children: PropTypes.node.isRequired,
   title: PropTypes.string.isRequired,
   nota : PropTypes.string,
+  id : PropTypes.string
 };
 
 export default Modal;

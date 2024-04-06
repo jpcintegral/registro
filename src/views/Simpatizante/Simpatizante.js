@@ -20,10 +20,13 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
 //import avatar from "assets/img/faces/jpc.jpg";
+import imgElectorDefault from "assets/img/imgElectorDefault.jpg"
 import Map from "../Maps/Maps.js";
 import axios from "axios";
 import OCRSpace from "helpers/OCRSpace.js";
 import Modal from "components/Modal/Modal.js";
+import Snackbar from "components/Snackbar/Snackbar.js";
+//import imageToBase64 from 'image-to-base64';
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -58,11 +61,14 @@ export default function Simpatizante() {
   const [estados, setestados] = useState([]);
   const [image, setImage] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [openModalMapa, setOpenModalMapa] = useState(false);
   
   const { userId } = useParams();
-  const [perfil, setPerfil] = useState(1);
+  //const [perfil, setPerfil] = useState(1);
   const [formDataImg, setFormDataImg] = useState(null);
   const [checkedFields, setCheckedFields] = useState([]);
+  const [mensaje, setMensaje] = useState(null);
+  const [bc, setBC] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     apellidoPaterno: "",
@@ -83,10 +89,13 @@ export default function Simpatizante() {
     estatus: "",
     localidad: "",
     claveElector: "",
+    curp: "",
     folio: "",
     vigenciaCredencial: "",
     lat: "",
     lon: "",
+    imgElectorFrontal: "",
+    imgElectorTrasera: "",
     fechaRegistro: null
   });
   
@@ -133,16 +142,15 @@ export default function Simpatizante() {
       
         // Llamar a la función para cargar los estados
         cargarEstados();     
-        setPerfil(1);
-         console.log(perfil);
-         utpdateMapa();
-        
-      }, [formDataImg,formData]);
+       // setPerfil(1);
+         
+      }, [userId]);
 
 
   // Método para insertar un nuevo simpatizante
   const insertSimpatizante = async (formData) => {
     try {
+       console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
       const response = await axios.post(`http://localhost:3800/api/simpatizantes`, formData);
       return response.data; // Devuelve los datos del nuevo simpatizante creado
     } catch (error) {
@@ -154,6 +162,7 @@ export default function Simpatizante() {
   // Método para actualizar un simpatizante existente
   const updateSimpatizante = async (formData) => {
     try {
+      console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
       const response = await axios.put(`http://localhost:3800/api/simpatizantes/${userId}`, formData);
       return response.data; // Devuelve los datos del simpatizante actualizado
     } catch (error) {
@@ -223,7 +232,6 @@ const handlestateChange = (event) => {
    setMunicipios(obtenerMunicipios);
    const nombreEstado= estados.find((etd)=> etd.idEstado==event.target.value).nombre;
    setState(nombreEstado);
-   utpdateMapa()
   }
   console.log("estado"+event.target.value);
 };
@@ -253,7 +261,6 @@ const handleInputChange = (e) => {
   const classes = useStyles();
   const handlePostalCodeChange = (event) => {
     setPostalCode(event.target.value);
-    utpdateMapa();
     handleInputChange(event);
     console.log("codigo postal",event.target.value);
   };
@@ -261,7 +268,6 @@ const handleInputChange = (e) => {
   const handleCityChange  = (event) => {
     const nombreMunicipio= municipio.find((mcp)=> mcp.idMunicipio==event.target.value).nombre;
     setCity(nombreMunicipio);
-    utpdateMapa();
     console.log("nombreMunicipio",nombreMunicipio);
   };
   const handleDateChange = (date) => {
@@ -291,22 +297,89 @@ const handleInputChange = (e) => {
     console.log("updatedMarkersData:",updatedMarkersData);
   };
 
-  const handleImageChange = async (e) => {
-    
-    const file = e.target.files[0];
-    setImage(null);
-    setImage(URL.createObjectURL(file));
-    const ocrs = await OCRSpace(file);
-    setFormDataImg(ocrs);
-    handleOpenModal();
-    e.target.value = null;
+
+ const  getBase64 = (file) => {
+    return new Promise(resolve => {
+      let fileInfo;
+      let baseURL = "";
+      // Make new FileReader
+      let reader = new FileReader();
+
+      // Convert the file to base64 text
+      reader.readAsDataURL(file);
+
+      // on reader load somthing...
+      reader.onload = () => {
+        // Make a fileInfo Object
+        console.log("Called", reader);
+        baseURL = reader.result;
+        console.log(baseURL);
+        resolve(baseURL);
+      };
+      console.log(fileInfo);
+    });
   };
 
-  const handleOpenModal = () => {
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+      // Verificar si es un archivo de imagen válido
+   
+      setImage(URL.createObjectURL(file));
+      const ocrs = await OCRSpace(file);
+      setFormDataImg(ocrs);
+      handleOpenModal();
+      getBase64(file)
+      .then(result => {
+        file["base64"] = result;
+        console.log("File Is", file);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          imgElectorFrontal: result
+        }));
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+     
+          
+      
+  };
+
+  const handleOpenModal = () => {   
     setOpenModal(true);
   };
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+
+
+  const handleOpenModalMapa = () => {
+
+     // Verificar si los campos necesarios tienen datos
+     if (!formData.codigoPostal || !formData.estado || !formData.municipio) {
+      showBottomCenterNotification("Es necesario tener los siguientes datos ingresados: Estado, Municipio y Código Postal");
+      return; // Detener la ejecución si falta algún dato
+    }
+      // 
+    utpdateMapa();
+    setOpenModalMapa(true);
+  };
+  const handleCloseModalMapa = () => {
+    setOpenModalMapa(false);
+  };
+
+    const handleMoldalMapa = () => {      
+        handleCloseModalMapa();
+   };
+
+   const showBottomCenterNotification = (message) => {
+    // Mostrar la notificación en la parte inferior central
+    setMensaje(message);
+    setBC(true);
+    setTimeout(() => {
+      setBC(false);     
+    }, 6000);
   };
 
   
@@ -368,21 +441,21 @@ try {
 
 
   const handleCheckboxVerification = () => {
-      // Verificar los checkboxes marcados y actualizar formData si es necesario
-  Object.keys(checkedFields).forEach((field) => {
-    if (checkedFields[field] && field in formDataImg) {
-      // Verificar si el campo está marcado y existe en formDataImg
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [field]: formDataImg[field] // Actualizar el valor del campo con el valor de formDataImg
-      }));
-    }
-  });
-
-    // Cerrar el modal después de la verificación
-    handleCloseModal();
+       // Verificar los checkboxes marcados y actualizar formData si es necesario
+      Object.keys(checkedFields).forEach((field) => {
+        if (checkedFields[field] && field in formDataImg) {
+          // Verificar si el campo está marcado y existe en formDataImg
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            [field]: formDataImg[field] // Actualizar el valor del campo con el valor de formDataImg
+          }));
+        }
+      });
+        // Cerrar el modal después de la verificación
+        handleCloseModal();
   };
 
+  
 
   if(loading && formData.nombre){
     return "<CircularProgress />";
@@ -392,7 +465,7 @@ try {
   return (
     <div>
       <GridContainer>
-        <GridItem xs={12} sm={12} md={8}>
+        <GridItem xs={12} sm={12} md={9}>
           <Card>
             <CardHeader color="info">
               <h4 className={classes.cardTitleWhite}>Simpatizante</h4>
@@ -629,6 +702,9 @@ try {
                 </GridItem>
               </GridContainer>
 
+
+
+
               <GridContainer>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
@@ -652,7 +728,14 @@ try {
                     }}
                   />
                 </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                    <Button color="primary" size="sm" variant="contained" onClick={handleOpenModalMapa}>
+                    buscar mapa
+                    </Button>
+              </GridItem>
               </GridContainer>
+
+              
               <GridContainer>
                 <GridItem xs={12} sm={12} md={12}>
                   <CustomInput
@@ -680,17 +763,13 @@ try {
           </Card>
         </GridItem>
 
-        <GridItem xs={12} sm={12} md={4}>
-          <Card profile>
+        <GridItem xs={12} sm={12} md={3}>
+          <Card profile className="img-container">
           <div className="img-container">
-           <img src={image} alt="Imagen" />
+           <img src={image ? image: imgElectorDefault} alt="Imagen" />
           </div>
           </Card>
-            <GridContainer>
-                  <GridItem xs={12} sm={12} md={12}>
-                  <Map markersData_={markersData} width="100%" height="300px" onMapUpdate={handleMapUpdate}  />
-                  </GridItem>
-            </GridContainer>
+          
         </GridItem>
         <GridItem xs={12} sm={12} md={12}>
         <Modal open={openModal} onClose={handleCloseModal} title="Detalle"
@@ -698,11 +777,11 @@ try {
         >
         <GridItem xs={12} sm={12} md={12}>
           {/* Aquí va el contenido del modal */}
-          <div className="card-container">
-          <div className="img-container">
-           <img src={image} alt="Imagen" />
-          </div>
-          </div>
+            <div className="card-container">
+              <div className="img-container">
+                <img src={image } alt="Imagen" />
+              </div>
+            </div>
           {/* Renderiza la lista de checkboxes */}
           {renderCheckboxes()}
         </GridItem>
@@ -710,10 +789,42 @@ try {
         <Button color="primary" variant="contained" onClick={handleCheckboxVerification}>
             Verificar y Actualizar
           </Button>
-        </GridItem>
-        
+        </GridItem>        
       </Modal>
       </GridItem>
+
+      <GridItem xs={12} sm={12} md={12}>
+        <Modal open={openModalMapa} onClose={handleOpenModalMapa} title="Mapa"
+        nota="Por favor, ubica y coloca la marca en el mapa en la ubicación del domicilio y luego presiona aceptar.">
+          
+          <GridContainer>
+                 <GridItem xs={6} >
+                <labe>long: {formData.lat }</labe> 
+                </GridItem>
+                <GridItem xs={6}>
+                <labe>long :{formData.lon }</labe> 
+                </GridItem>
+           </GridContainer>
+          {           
+            <GridItem xs={12} sm={12} md={12}>
+              <Map markersData_={markersData} width="100%" height="300px" onMapUpdate={handleMapUpdate}  />
+            </GridItem> 
+           }
+        <GridItem xs={12}>
+          <Button color="primary" variant="contained" onClick={handleMoldalMapa}>
+              Guardar ubicacion
+          </Button>
+        </GridItem>        
+      </Modal>
+      </GridItem>
+      <Snackbar
+        place="br"
+        color="danger"
+        message={mensaje}
+        open={bc}
+        closeNotification={() => setBC(false)}
+        close
+      />
       </GridContainer>
 
       

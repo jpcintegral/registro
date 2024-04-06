@@ -12,8 +12,9 @@ import axios from "axios";
 import * as XLSX from 'xlsx';
 import CustomInput from "components/CustomInput/CustomInput.js";
 import Modal from "components/Modal/Modal.js";
-import CardAvatar from "components/Card/CardAvatar.js";
-import avatar from "assets/img/faces/jpc.jpg";
+//import jsPDF from 'jspdf';
+
+//import avatar from "assets/img/faces/jpc.jpg";
 
 
 const styles = {
@@ -100,7 +101,7 @@ export default function Simpatizantes() {
     setOpenModal(false);
   };
   const handleDetail = (simpatizanteId) => {
-    console.log(simpatizanteId); // Lógica para mostrar detalles del simpatizante
+   // Lógica para mostrar detalles del simpatizante
     const detalleUsuario = simpatizantes.find(user => user._id === simpatizanteId);
     setDetalleUsuario(detalleUsuario);
     handleOpenModal();
@@ -133,8 +134,7 @@ export default function Simpatizantes() {
     }
 
     function getNombreMunicipio(idMunicipio) {
-       console.log("municipiosList",municipiosList);
-      if (municipiosList && municipiosList.length > 0) {
+       if (municipiosList && municipiosList.length > 0) {
         const municipioEncontrado = municipiosList.find((mcp) => mcp.idMunicipio === idMunicipio);
         return municipioEncontrado ? municipioEncontrado.nombre : "";
       }
@@ -168,12 +168,31 @@ export default function Simpatizantes() {
     );
   
     const printUserDetailToPDF = () => {
-        // Verifica la documentación de la librería jsPDF para obtener más detalles: https://github.com/MrRio/jsPDF
+      // Verifica la documentación de la librería jsPDF para obtener más detalles: https://github.com/MrRio/jsPDF
       window.print();
     };
     const handleFilterChange = (e) => {
       setFilterValue(e.target.value);
     };
+
+    
+
+    const  Simpatizante = (simpatizante )=> {
+      // Obtener la cadena base64 de imgElectorFrontal
+      const base64Img = simpatizante;
+    
+      // Renderizar la imagen si la cadena base64 es válida
+      return (
+        <div>
+           {base64Img ? (
+            <img src={base64Img} alt="Credencial" className="img-elector" />
+          ) : (
+            ""
+          )}
+        </div>
+      );
+    }
+
     if(loading || !estadosList || !municipiosList){
       console.log(loading);
       return "<CircularProgress />";
@@ -249,14 +268,13 @@ export default function Simpatizantes() {
         </Card>
       </GridItem>
       <Modal open={openModal} onClose={handleCloseModal} title="Detalle">
-      <GridItem xs={12} sm={12} md={12}>
-          <Card profile>
-            <CardAvatar profile>
-              <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                <img src={avatar} alt="..." />
-              </a>
-            </CardAvatar>
-            <CardBody profile >
+        <GridItem xs={4} sm={4} md={4}>
+        
+                    { detalleUsuario && ( Simpatizante(detalleUsuario.imgElectorFrontal) )}
+                 
+        </GridItem>
+      <GridItem xs={12} sm={12} md={12}>            
+               
               {detalleUsuario && (
               <React.Fragment>
                 <div className="card-container">
@@ -273,16 +291,15 @@ export default function Simpatizantes() {
                 <p className="description">Comentario Personal: {detalleUsuario.comentarioPersonal}</p>
                 </div>
               </React.Fragment>
-            )}
+            )}         
+        </GridItem>
+        <GridItem xs={12}>
         <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF}>
           Imprimir
-        </Button>
-             
-            </CardBody>
-          </Card>
-           
+        </Button> 
         </GridItem>
-      </Modal>
+      </Modal>    
+
     </GridContainer>
   );
 }
