@@ -15,6 +15,7 @@ import Modal from "components/Modal/Modal.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 import avatar from "assets/img/faces/jpc.jpg";
 import { ShimmerTable } from "react-shimmer-effects";
+import PropTypes from "prop-types";
 
 //import UserForm from "path/to/UserForm"; // Ruta al componente UserForm
 
@@ -64,9 +65,14 @@ const estatusMap = {
     "2": "Mujer",
     "3": "Otro"
     }
-export default function UserSystems() {
+export default function UserSystems(props) {
+  const { userId, perfil } = props;
+  console.log("userId",userId);
+   console.log("perfil",perfil);
   const history = useHistory();
   const classes = useStyles();
+ 
+   
   const [users, setUsers] = useState([]);
   const [filterValue, setFilterValue] = useState('');
   const [municipiosList,setMunicipiosList] = useState(null);
@@ -74,6 +80,7 @@ export default function UserSystems() {
   const [openModal, setOpenModal] = useState(false);
   const [detalleUsuario,setDetalleUsuario]=useState(null);
   const [loading, setLoading] = useState(false);
+  const [idUsuarioBaja,setIdUsuarioBaja]= useState([]);
 
  
   const fetchUsers = async () => {
@@ -106,6 +113,7 @@ export default function UserSystems() {
    }
 
   useEffect(() => {
+    setIdUsuarioBaja("65f4b7048317e1d5dbc1807a");
     setLoading(true);
     fetchUsers();
     getEstados();
@@ -148,7 +156,7 @@ export default function UserSystems() {
   }
   const handleDelete = async (userId) => {
     try {
-      await axios.put(`http://localhost:3800/api/user/desactivar/${userId}`);
+      await axios.put(`http://localhost:3800/api/user/desactivar/${userId}/${idUsuarioBaja}`);
       const updatedUsers = users.filter(user => user._id !== userId);
       setUsers(updatedUsers);
     } catch (error) {
@@ -292,4 +300,11 @@ export default function UserSystems() {
       </Modal>
     </GridContainer>
   );
+
 }
+  // Definir PropTypes para las props
+  UserSystems.propTypes = {
+    userId: PropTypes.string.isRequired,
+    perfil: PropTypes.number.isRequired,
+  };
+

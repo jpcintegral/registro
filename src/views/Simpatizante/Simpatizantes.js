@@ -61,6 +61,7 @@ export default function Simpatizantes() {
   const [filterValue, setFilterValue] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [detalleUsuario,setDetalleUsuario]=useState(null);
+  const [idUsuarioBaja,setIdUsuarioBaja]= useState([]);
 
   const fetchSimpatizantes = async () => {
     try {
@@ -91,6 +92,7 @@ export default function Simpatizantes() {
    }
 
   useEffect(() => {
+    setIdUsuarioBaja("65f4b7048317e1d5dbc1807a");
     fetchSimpatizantes();
     getEstados();
     getMunicipos();
@@ -115,7 +117,7 @@ export default function Simpatizantes() {
 
   const handleDelete = async (simpatizanteId) => {
     try {
-      await axios.put(`http://localhost:3800/api/simpatizantes/desactivar/${simpatizanteId}`);
+      await axios.put(`http://localhost:3800/api/simpatizantes/desactivar/${simpatizanteId}/${idUsuarioBaja}`);
       const updatedSimpatizantes = simpatizantes.filter(simpatizante => simpatizante._id !== simpatizanteId);
       setSimpatizantes(updatedSimpatizantes);
      
@@ -228,8 +230,6 @@ export default function Simpatizantes() {
               tableHeaderColor="info"
               tableHead={[
                 "Nombre",
-                "Apellido Paterno",
-                "Apellido Materno",
                 "Género",
                 "Email",
                 "Fecha de Nacimiento",
@@ -243,9 +243,7 @@ export default function Simpatizantes() {
                 "Acciones"
               ]}
               tableData={filteredSimpatizantes.map((simpatizante) => [
-                simpatizante.nombre,
-                simpatizante.apellidoPaterno,
-                simpatizante.apellidoMaterno,
+                [simpatizante.nombre, simpatizante.apellidoPaterno, simpatizante.apellidoMaterno].join(' '),
                 simpatizante.genero && generoMap[simpatizante.genero],
                 simpatizante.email,
                 simpatizante.fechaNacimiento ? new Date(simpatizante.fechaNacimiento).toLocaleDateString('es-MX') : '',
@@ -281,7 +279,7 @@ export default function Simpatizantes() {
                 <h6 className="card-title">
                   {detalleUsuario.nombre} {detalleUsuario.apellidoPaterno} {detalleUsuario.apellidoMaterno}
                 </h6>
-                <p className="description">Fecha de Nacimiento: {detalleUsuario.fechaNacimiento}</p>
+                <p className="description">Fecha de Nacimiento: {detalleUsuario.fechaNacimiento   ? new Date(detalleUsuario.fechaNacimiento).toLocaleDateString('es-MX') : '' }</p>
                 <p className="description">Clave de Elector: {detalleUsuario.claveElector}</p>
                 <p className="description">Curp: {detalleUsuario.curp}</p>
                 <p className="description">Calle: {detalleUsuario.calle}</p>

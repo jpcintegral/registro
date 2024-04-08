@@ -58,14 +58,12 @@ export default function Simpatizante() {
   
   
   const [markersData, setMarkersData] = useState([]);
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
   const [startDate, setStartDate] = React.useState();
   const [loading, setLoading] = useState(false);
   const [municipio, setMunicipios] = useState([]);
   const [estados, setestados] = useState([]);
   const [image, setImage] = useState(null);
+  const [imageTracera, setImageTracera] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [openModalMapa, setOpenModalMapa] = useState(false);
   
@@ -75,6 +73,8 @@ export default function Simpatizante() {
   const [checkedFields, setCheckedFields] = useState([]);
   const [mensaje, setMensaje] = useState(null);
   const [bc, setBC] = useState(false);
+  const [idUsuarioAlta,setIdUsuarioAlta]= useState([]);
+  const [idUsuarioUpdate,setIdUsuarioUpdate]= useState([]);
   const [formData, setFormData] = useState({
     nombre: "",
     apellidoPaterno: "",
@@ -102,12 +102,15 @@ export default function Simpatizante() {
     lon: "",
     imgElectorFrontal: "",
     imgElectorTrasera: "",
+    idUsuarioAlta: "",
+    idUsuarioUpdate: "",
     fechaRegistro: null
   });
   
   useEffect(() => {
     // Actualizar el estado markersData con los nuevos valores de city, country y postalCode
-   
+    setIdUsuarioAlta("65f4b7048317e1d5dbc1807a");
+    setIdUsuarioUpdate("65f4b7048317e1d5dbc1807a")
 
         if (userId && userId !== ":userId") {
           setLoading(true);
@@ -154,6 +157,7 @@ export default function Simpatizante() {
   // Método para insertar un nuevo simpatizante
   const insertSimpatizante = async (formData) => {
     try {
+      formData.idUsuarioAlta=idUsuarioAlta;
       // console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
       const response = await axios.post(`http://localhost:3800/api/simpatizantes`, formData);
       return response.data; // Devuelve los datos del nuevo simpatizante creado
@@ -166,6 +170,7 @@ export default function Simpatizante() {
   // Método para actualizar un simpatizante existente
   const updateSimpatizante = async (formData) => {
     try {
+      formData.idUsuarioUpdate=idUsuarioUpdate;
       //console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
       const response = await axios.put(`http://localhost:3800/api/simpatizantes/${userId}`, formData);
       return response.data; // Devuelve los datos del simpatizante actualizado
@@ -199,10 +204,10 @@ async function cargarMunicipios(idEstado) {
   const newMarkersData = [
     {
       nombre: formData.nombre + " " +formData.apellidoPaterno+" "+formData.apellidoMaterno ,
-      state: state ,
-      municipality: city ,
+      state: getNombreEstado(formData.estado) ,
+      municipality: getNombreMunicipio(formData.municipio) ,
       neighborhood: formData.colonia ,
-      postalCode: postalCode,
+      postalCode: formData.codigoPostal,
       street: formData.calle ,
       number: formData.numeroCalle,
     }
@@ -246,8 +251,8 @@ const handlestateChange = (event) => {
   if(event.target.value){
    const obtenerMunicipios = cargarMunicipios(event.target.value);
    setMunicipios(obtenerMunicipios);
-   const nombreEstado= estados.find((etd)=> etd.idEstado==event.target.value).nombre;
-   setState(nombreEstado);
+   //const nombreEstado= estados.find((etd)=> etd.idEstado==event.target.value).nombre;
+   //setState(nombreEstado);
   }
 
 }
@@ -259,7 +264,7 @@ const handleDropdownChanEstado = (event) => {
 
 const handleDropdownChanMunicipio = (event) => {
 
-  handleCityChange(event); // Llama a la primera función
+  //handleCityChange(event); // Llama a la primera función
   handleInputChange(event); // Llama a la segunda función
 
 }
@@ -277,18 +282,19 @@ const handleInputChange = (e) => {
 
   const handlePostalCodeChange = (event) => {
 
-    setPostalCode(event.target.value);
+    //setPostalCode(event.target.value);
     handleInputChange(event);
 
   }
   
+  /*
   const handleCityChange  = (event) => {
 
     const nombreMunicipio= municipio.find((mcp)=> mcp.idMunicipio==event.target.value).nombre;
     setCity(nombreMunicipio);
     
   }
-
+*/
   const handleDateChange = (date) => {
 
     setStartDate(date);
@@ -350,6 +356,31 @@ const handleInputChange = (e) => {
         setFormData((prevFormData) => ({
           ...prevFormData,
           imgElectorFrontal: result
+        }));
+      })
+      .catch(err => {
+        console.log(err);
+      });       
+      e.target.value = null;
+      
+  };
+
+
+  const handleImageTraceraChange = async (e) => {
+
+    const file = e.target.files[0];
+      // Verificar si es un archivo de imagen válido
+      setImageTracera(URL.createObjectURL(file));
+      //const ocrs = await OCRSpace(file);
+      //console.log(ocrs.fechaNacimiento);
+      //setFormDataImg(ocrs);
+      //handleOpenModal();
+      getBase64(file)
+      .then(result => {
+        file["base64"] = result;
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          imgElectorTracera: result
         }));
       })
       .catch(err => {
@@ -526,7 +557,20 @@ const handleInputChange = (e) => {
 
   
 
-
+    function getNombreMunicipio(idMunicipio) {
+      if (municipio && municipio.length > 0) {
+       const municipioEncontrado = municipio.find((mcp) => mcp.idMunicipio === idMunicipio);
+       return municipioEncontrado ? municipioEncontrado.nombre : "";
+     }
+     return "";
+   }
+   function getNombreEstado(idEstado) {
+     if (estados && estados.length > 0) {
+       const estadoEncontrado = estados.find((est) => est.idEstado === idEstado);
+       return estadoEncontrado ? estadoEncontrado.nombre : "";
+     }
+     return "";
+   }
 
   return (
  
@@ -549,7 +593,7 @@ const handleInputChange = (e) => {
                     Credencial (Frontal)
                     </Button>
                   </label>
-                <input accept="image/*" className="input-file" id="CredencialTracera" onChange={handleImageChange} type="file" />
+                <input accept="image/*" className="input-file" id="CredencialTracera" onChange={handleImageTraceraChange} type="file" />
                   <label htmlFor="CredencialTracera">
                     <Button variant="contained" color="primary" size="sm" component="span">
                     Credencial (Tracera)
@@ -856,11 +900,24 @@ const handleInputChange = (e) => {
         </GridItem>
 
         <GridItem xs={12} sm={12} md={3}>
+        <GridItem xs={12} sm={12} md={12}>
           <Card profile className="img-container">
           <div className="img-container">
            <img src={image ? image: imgElectorDefault} alt="Imagen" />
           </div>
           </Card>
+          </GridItem>
+          <GridItem xs={12} sm={12} md={12}>
+                  
+          {imageTracera && (
+            <Card profile className="img-container">
+            <div className="img-container">
+              <img src={imageTracera} alt="ImagenTracera" />
+            </div>
+             </Card>
+          )}         
+          </GridItem>
+          
           
         </GridItem>
         <GridItem xs={12} sm={12} md={12}>
@@ -886,15 +943,18 @@ const handleInputChange = (e) => {
       </GridItem>
 
       <GridItem xs={12} sm={12} md={12}>
-        <Modal open={openModalMapa} onClose={handleOpenModalMapa} title="Mapa"
+        <Modal open={openModalMapa} onClose={handleCloseModalMapa} title="Mapa"
         nota="Por favor, ubica y coloca la marca en el mapa en la ubicación del domicilio y luego presiona aceptar.">
           
           <GridContainer>
-                 <GridItem xs={6} >
-                <labe>long: {formData.lat }</labe> 
-                </GridItem>
-                <GridItem xs={6}>
-                <labe>long :{formData.lon }</labe> 
+                
+                <GridItem xs={12}>
+                <labe>Dirección :</labe> 
+                  <label>Calle: {[formData.calle,"#"+formData.numeroCalle].join(' ')} </label> <br/>
+                  <label>Colonia: {formData.colonia} </label> <br/>
+                  <label>Estado: {getNombreEstado(formData.estado)} </label> 
+                  <label>Municipio: {getNombreMunicipio(formData.municipio)} </label> <br/>
+                  <label>CP: {formData.codigoPostal} </label>
                 </GridItem>
            </GridContainer>
           {           
@@ -902,11 +962,16 @@ const handleInputChange = (e) => {
               <Map markersData_={markersData} width="100%" height="300px" onMapUpdate={handleMapUpdate}  />
             </GridItem> 
            }
-        <GridItem xs={12}>
+        <GridItem xs={4}>
           <Button color="primary" variant="contained" onClick={handleMoldalMapa}>
               Guardar ubicacion
           </Button>
-        </GridItem>        
+        </GridItem>    
+        <GridItem xs={4} >
+                <labe>long: {formData.lat }</labe>  
+                <labe>long :{formData.lon }</labe> 
+                </GridItem>
+                 
       </Modal>
       </GridItem>
       <Snackbar

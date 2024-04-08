@@ -25,6 +25,8 @@ export default function UserForm() {
     const [estados, setestados] = useState([]);
     const [municipio, setMunicipios] = useState([]);
     const [perfil, setPerfil] = useState(1);
+    const [idUsuarioAlta,setIdUsuarioAlta]= useState([]);
+     const [idUsuarioUpdate,setIdUsuarioUpdate]= useState([]);
     const [formData, setFormData] = useState({
       nombre: "",
       apellidoPaterno: "",
@@ -40,11 +42,15 @@ export default function UserForm() {
       comentarioPersonal: "",
       estatus: 0,
       tipoCuenta: 0,
-      password: ""
+      password: "",
+      idUsuarioAlta: "",
+      idUsuarioUpdate: "",
     });
    
   
     useEffect(() => {
+      setIdUsuarioAlta("65f4b7048317e1d5dbc1807a");
+      setIdUsuarioUpdate("65f4b7048317e1d5dbc1807a")
         if (userId && (userId!=":userId")) {
             setLoading(true);
            
@@ -141,11 +147,13 @@ export default function UserForm() {
     };
   
     const updateUsuario = async (userData) => {
+      userData.idUsuarioUpdate=idUsuarioUpdate;
       // Lógica para actualizar el usuario en el backend
        await axios.put(`http://localhost:3800/api/user/${userId}`, userData);
     };
   
     const insertUsuario = async (userData) => {
+      userData.idUsuarioAlta=idUsuarioAlta;
       // Lógica para insertar un nuevo usuario en el backend
       await axios.post("http://localhost:3800/api/user", userData);
     };
