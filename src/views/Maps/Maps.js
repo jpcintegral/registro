@@ -166,12 +166,22 @@ const Map = ({ markersData_ ,width, height,onMapUpdate }) => {
   
 
     const getMarkerContent = async (nombre, edad, state, municipality, neighborhood, postalCode, street, number, index) => {
-    const queryString = `q=${encodeURIComponent('mexico, ' + municipality + ', ' + state + ', ' + postalCode)}&bounded=1&limit=1`;
-  
+    console.log([nombre, edad, state, municipality, neighborhood, postalCode, street, number, index].join(", "));
+    let parametros = `q=${encodeURIComponent('mexicol, ' + municipality + ', ' + state + ', ' + postalCode + ',   '+neighborhood+', '+ number +' '+  street+', ' )}&bounded=1&limit=1`;
+    let queryString =`https://nominatim.openstreetmap.org/search?addressdetails=1&${parametros}&format=json`;
+    console.log(queryString)
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&${queryString}`);
-      const data = await response.json();
+      let response = await fetch(queryString);
+      let data = await response.json();
        console.log(data);
+       if (data.length === 0) {
+
+         parametros = `q=${encodeURIComponent('mexicol, ' + municipality + ', ' + state + ', ' + postalCode + ', '+ number +' '+  street+', ' )}&bounded=1&limit=1`;
+         queryString =`https://nominatim.openstreetmap.org/search?addressdetails=1&${parametros}&format=json`; 
+         response = await fetch(queryString);
+          data = await response.json();
+      }
+
       if (data.length > 0) {
         const { lat, lon } = data[0];
         const offset = index * 0.0001;
@@ -184,6 +194,23 @@ const Map = ({ markersData_ ,width, height,onMapUpdate }) => {
 
         
        return marker;
+      }else{
+
+        parametros = `q=${encodeURIComponent('mexico, Colima, colima, 28000' )}&bounded=1&limit=1`;
+         queryString =`https://nominatim.openstreetmap.org/search?addressdetails=1&${parametros}&format=json`; 
+         response = await fetch(queryString);
+          data = await response.json();
+          const { lat, lon } = data[0];
+          const offset = index * 0.0001;
+          const markerIcon = L.icon({
+            iconUrl: Mapa_usuario,
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+          });  
+          const marker = L.marker([parseFloat(lat) + offset, parseFloat(lon) + offset], { draggable: true, icon: markerIcon });
+  
+          
+         return marker;
       }
     } catch (error) {
       console.log("error");
