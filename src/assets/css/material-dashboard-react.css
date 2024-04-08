@@ -561,8 +561,9 @@ footer ul li a:hover {
 }
 
 .description {
-  font-size: 1rem;
-  margin-bottom: 5px;
+  font-size: 13px;
+  margin-bottom: 1px;
+  line-height: 0.5em;
 }
 @media print {
   .hide-on-print {
@@ -584,4 +585,8 @@ footer ul li a:hover {
 
 .img-elector{
   width:400px;
+}
+
+.input-file{
+  display: none;
 }

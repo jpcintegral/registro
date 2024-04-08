@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
 import Modal from "components/Modal/Modal.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 import avatar from "assets/img/faces/jpc.jpg";
+import { ShimmerTable } from "react-shimmer-effects";
 
 //import UserForm from "path/to/UserForm"; // Ruta al componente UserForm
 
@@ -72,12 +73,14 @@ export default function UserSystems() {
   const [estadosList,setEstadosList] =useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [detalleUsuario,setDetalleUsuario]=useState(null);
+  const [loading, setLoading] = useState(false);
 
  
   const fetchUsers = async () => {
     try {
       const response = await axios.get("http://localhost:3800/api/users");
       setUsers(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -86,6 +89,7 @@ export default function UserSystems() {
     try {
       const responseEstados= await axios.get("http://localhost:3800/api/estados");
       setEstadosList(responseEstados.data);
+      setLoading(false);
     } catch(error) {
       console.error("Errro get estados:", error);
     }
@@ -95,12 +99,14 @@ export default function UserSystems() {
     try {
       const responseMunicipios= await axios.get("http://localhost:3800/api/municipios");
       setMunicipiosList(responseMunicipios.data);
+      setLoading(false);
     } catch(error) {
       console.error("Errro get estados:", error);
     }
    }
 
   useEffect(() => {
+    setLoading(true);
     fetchUsers();
     getEstados();
     getMunicipos();
@@ -127,7 +133,6 @@ export default function UserSystems() {
   };
 
   function getNombreMunicipio(idMunicipio) {
-    console.log("municipiosList",municipiosList);
    if (municipiosList && municipiosList.length > 0) {
      const municipioEncontrado = municipiosList.find((mcp) => mcp.idMunicipio === idMunicipio);
      return municipioEncontrado ? municipioEncontrado.nombre : "";
@@ -181,15 +186,18 @@ export default function UserSystems() {
     // Verifica la documentación de la librería jsPDF para obtener más detalles: https://github.com/MrRio/jsPDF
     window.print();
   };
+
+  if(loading){
+      
+    return <ShimmerTable row={6} col={6} />;
+ }
+
   return (
     <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="info">
-            <h4 className={classes.cardTitleWhite}>Usuarios</h4>
-            <p className={classes.cardCategoryWhite}>
-              Lista de usuarios registrados.
-            </p>
+            <h4 className={classes.cardTitleWhite}>  Lista de usuarios registrados</h4>
             <p >
             <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredUsers)}>Descargar Tabla</Button>
             <Button color="primary" size="sm" onClick={() => exportToExcelBase(users)}>Descargar Base</Button>

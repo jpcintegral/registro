@@ -12,6 +12,7 @@ import axios from "axios";
 import * as XLSX from 'xlsx';
 import CustomInput from "components/CustomInput/CustomInput.js";
 import Modal from "components/Modal/Modal.js";
+import { ShimmerTable } from "react-shimmer-effects";
 //import jsPDF from 'jspdf';
 
 //import avatar from "assets/img/faces/jpc.jpg";
@@ -194,18 +195,17 @@ export default function Simpatizantes() {
     }
 
     if(loading || !estadosList || !municipiosList){
-      console.log(loading);
-      return "<CircularProgress />";
+      
+      return <ShimmerTable row={6} col={6} />;
    }
   return ( 
+
     <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="info">
-            <h4 className={classes.cardTitleWhite}>Simpatizantes</h4>
-            <p className={classes.cardCategoryWhite}>
-              Lista de simpatizantes registrados.
-            </p>
+            <h4 className={classes.cardTitleWhite}>Lista de simpatizantes registrados</h4>
+            
             <p >
             <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}>Descargar Tabla</Button>
             <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}>Descargar Base</Button>
@@ -281,13 +281,16 @@ export default function Simpatizantes() {
                 <h6 className="card-title">
                   {detalleUsuario.nombre} {detalleUsuario.apellidoPaterno} {detalleUsuario.apellidoMaterno}
                 </h6>
-                <p className="description">Email: {detalleUsuario.email}</p>
-                <p className="description">Teléfono: {detalleUsuario.telefono}</p>
                 <p className="description">Fecha de Nacimiento: {detalleUsuario.fechaNacimiento}</p>
+                <p className="description">Clave de Elector: {detalleUsuario.claveElector}</p>
+                <p className="description">Curp: {detalleUsuario.curp}</p>
+                <p className="description">Calle: {detalleUsuario.calle}</p>
+                <p className="description">Colonia: {detalleUsuario.colonia}</p>
+                <p className="description">Código Postal: {detalleUsuario.codigoPostal}</p>
                 <p className="description">Estado: {getNombreEstado(detalleUsuario.estado)}</p>
                 <p className="description">Municipio: {getNombreMunicipio(detalleUsuario.municipio)}</p>
-                <p className="description">Código Postal: {detalleUsuario.codigoPostal}</p>
-                <p className="description">Colonia: {detalleUsuario.colonia}</p>
+                <p className="description">Email: {detalleUsuario.email}</p>
+                <p className="description">Teléfono: {detalleUsuario.telefono}</p>
                 <p className="description">Comentario Personal: {detalleUsuario.comentarioPersonal}</p>
                 </div>
               </React.Fragment>

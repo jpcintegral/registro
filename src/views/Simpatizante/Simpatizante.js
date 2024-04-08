@@ -3,6 +3,7 @@ import { useHistory, useParams } from "react-router-dom";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 
+
 import { List, ListItem, Checkbox, ListItemText } from "@material-ui/core"
 //import InputLabel from "@material-ui/core/InputLabel";
 // core components
@@ -24,6 +25,7 @@ import imgElectorDefault from "assets/img/imgElectorDefault.jpg"
 import Map from "../Maps/Maps.js";
 import axios from "axios";
 import OCRSpace from "helpers/OCRSpace.js";
+import formLoader from "helpers/formLoader.js";
 import Modal from "components/Modal/Modal.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 //import imageToBase64 from 'image-to-base64';
@@ -47,10 +49,14 @@ const styles = {
 };
 
 
+
 const useStyles = makeStyles(styles);
 
 export default function Simpatizante() {
   const history = useHistory();
+  const classes = useStyles();
+  
+  
   const [markersData, setMarkersData] = useState([]);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -139,18 +145,16 @@ export default function Simpatizante() {
           console.error('Error al cargar los estados:', error);
         }
       }
-      
-        // Llamar a la función para cargar los estados
+      // Llamar a la función para cargar los estados
         cargarEstados();     
-       // setPerfil(1);
-         
+               
       }, [userId]);
 
 
   // Método para insertar un nuevo simpatizante
   const insertSimpatizante = async (formData) => {
     try {
-       console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
+      // console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
       const response = await axios.post(`http://localhost:3800/api/simpatizantes`, formData);
       return response.data; // Devuelve los datos del nuevo simpatizante creado
     } catch (error) {
@@ -162,7 +166,7 @@ export default function Simpatizante() {
   // Método para actualizar un simpatizante existente
   const updateSimpatizante = async (formData) => {
     try {
-      console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
+      //console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
       const response = await axios.put(`http://localhost:3800/api/simpatizantes/${userId}`, formData);
       return response.data; // Devuelve los datos del simpatizante actualizado
     } catch (error) {
@@ -182,95 +186,111 @@ async function obtenerMunicipios(idEstado) {
   }
 }
 async function cargarMunicipios(idEstado) {
+ 
   try {
     const municipiosObtenidos = await obtenerMunicipios(idEstado);
     setMunicipios(municipiosObtenidos);
   } catch (error) {
     console.error('Error al cargar los estados:', error);
   }
+
 }
  function utpdateMapa(){
   const newMarkersData = [
     {
-      nombre: "jose pastor",
-      edad: 46,
-      state: state ? state : "colima",
-      municipality: city ? city : "colima",
-      neighborhood: formData.colonia ? formData.colonia : 'la armonia',
-      postalCode: postalCode ? postalCode: "28020",
-      street: formData.calle ? formData.calle : 'independencia',
-      number: formData.numeroCalle ? formData.numeroCalle : '271',
+      nombre: formData.nombre + " " +formData.apellidoPaterno+" "+formData.apellidoMaterno ,
+      state: state ,
+      municipality: city ,
+      neighborhood: formData.colonia ,
+      postalCode: postalCode,
+      street: formData.calle ,
+      number: formData.numeroCalle,
     }
     // Resto de los objetos del markersData...
   ];
   setMarkersData(newMarkersData);
 
  }
-const handleSubmit = async (e) => {
+
+ 
+ const handleSubmit = async (e) => {
   e.preventDefault();
+
   try {
-    if (userId && userId !== ":userId") {
-      await updateSimpatizante(formData);
-      history.push("/admin/Simpatizantes");
-    } else { 
-      console.log(formData)
-     
-     
-      await insertSimpatizante(formData);
-      history.push("/admin/Simpatizantes");
-      
+    // Validar que todos los campos obligatorios estén llenos
+    const requiredFields = ['nombre', 'apellidoPaterno', 'apellidoMaterno', 'genero', 'telefono', 'email', 'fechaNacimiento', 'estado', 'municipio', 'colonia', 'calle', 'numeroCalle', 'seccion', 'codigoPostal', 'claveElector', 'curp', 'vigenciaCredencial'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+
+    if (missingFields.length > 0) {
+      // Si faltan campos obligatorios, mostrar una notificación con los campos faltantes
+      const errorMessage = `Los siguientes campos son obligatorios: ${missingFields.join(', ')}`;
+      showBottomCenterNotification(errorMessage);
+    } else {
+      // Todos los campos están llenos, proceder con el envío de datos
+      if (userId && userId !== ":userId") {
+        await updateSimpatizante(formData);
+        history.push("/admin/Simpatizantes");
+      } else {     
+        await insertSimpatizante(formData);
+        history.push("/admin/Simpatizantes");      
+      }
     }
   } catch (error) {
     console.error("Error:", error);
   }
-};
+}
+
  
 const handlestateChange = (event) => {
-  if(event.target.value){
 
+  if(event.target.value){
    const obtenerMunicipios = cargarMunicipios(event.target.value);
    setMunicipios(obtenerMunicipios);
    const nombreEstado= estados.find((etd)=> etd.idEstado==event.target.value).nombre;
    setState(nombreEstado);
   }
-  console.log("estado"+event.target.value);
-};
+
+}
 
 const handleDropdownChanEstado = (event) => {
   handlestateChange(event); // Llama a la primera función
   handleInputChange(event); // Llama a la segunda función
-};
+}
 
 const handleDropdownChanMunicipio = (event) => {
-  console.log(event)
+
   handleCityChange(event); // Llama a la primera función
   handleInputChange(event); // Llama a la segunda función
-};
+
+}
 
 const handleInputChange = (e) => {
-      console.log("done");
+      
       const { name, value } = e.target;
-      console.log("name:", name, "value:", value);
       setFormData((prevData) => ({
       ...prevData,
       [name]: value,
       }));
 
-  };
+  }
 
-  const classes = useStyles();
+
   const handlePostalCodeChange = (event) => {
+
     setPostalCode(event.target.value);
     handleInputChange(event);
-    console.log("codigo postal",event.target.value);
-  };
+
+  }
   
   const handleCityChange  = (event) => {
+
     const nombreMunicipio= municipio.find((mcp)=> mcp.idMunicipio==event.target.value).nombre;
     setCity(nombreMunicipio);
-    console.log("nombreMunicipio",nombreMunicipio);
-  };
+    
+  }
+
   const handleDateChange = (date) => {
+
     setStartDate(date);
      // Crear el objeto con el nombre y el valor
   const dateObj = {
@@ -280,11 +300,11 @@ const handleInputChange = (e) => {
     },
   };
     handleInputChange(dateObj);
-  };
+  }
+
   const generoOptions = [
     { id: "1", nombre: "Hombre" },
-    { id: "2", nombre: "Mujer" },
-    { id: "3", nombre: "Otro" }
+    { id: "2", nombre: "Mujer" }
   ];
 
   const handleMapUpdate = (updatedMarkersData) => {
@@ -299,39 +319,34 @@ const handleInputChange = (e) => {
 
 
  const  getBase64 = (file) => {
+
     return new Promise(resolve => {
-      let fileInfo;
-      let baseURL = "";
-      // Make new FileReader
-      let reader = new FileReader();
-
-      // Convert the file to base64 text
-      reader.readAsDataURL(file);
-
-      // on reader load somthing...
+    
+      let baseURL = "";     
+      let reader = new FileReader();      
+      reader.readAsDataURL(file);      
       reader.onload = () => {
-        // Make a fileInfo Object
-        console.log("Called", reader);
         baseURL = reader.result;
-        console.log(baseURL);
         resolve(baseURL);
       };
-      console.log(fileInfo);
+      
     });
+
   };
 
   const handleImageChange = async (e) => {
+
     const file = e.target.files[0];
       // Verificar si es un archivo de imagen válido
    
       setImage(URL.createObjectURL(file));
       const ocrs = await OCRSpace(file);
+      console.log(ocrs.fechaNacimiento);
       setFormDataImg(ocrs);
       handleOpenModal();
       getBase64(file)
       .then(result => {
         file["base64"] = result;
-        console.log("File Is", file);
         setFormData((prevFormData) => ({
           ...prevFormData,
           imgElectorFrontal: result
@@ -339,19 +354,18 @@ const handleInputChange = (e) => {
       })
       .catch(err => {
         console.log(err);
-      });
-
-     
-          
+      });       
+      e.target.value = null;
       
   };
 
   const handleOpenModal = () => {   
     setOpenModal(true);
-  };
+  }
+
   const handleCloseModal = () => {
     setOpenModal(false);
-  };
+  }
 
 
   const handleOpenModalMapa = () => {
@@ -364,12 +378,14 @@ const handleInputChange = (e) => {
       // 
     utpdateMapa();
     setOpenModalMapa(true);
-  };
+  }
+
   const handleCloseModalMapa = () => {
     setOpenModalMapa(false);
-  };
+  }
 
-    const handleMoldalMapa = () => {      
+
+  const handleMoldalMapa = () => {      
         handleCloseModalMapa();
    };
 
@@ -379,12 +395,13 @@ const handleInputChange = (e) => {
     setBC(true);
     setTimeout(() => {
       setBC(false);     
-    }, 6000);
+    }, 9000);
   };
 
   
    // Renderiza la lista de checkboxes
    const renderCheckboxes = () => {
+
     if (!formDataImg) return null; // Si no hay detalles de usuario, no renderiza nada
   
     const keys = Object.keys(formDataImg);
@@ -424,46 +441,100 @@ const handleInputChange = (e) => {
         </GridItem>
       </GridItem>
     );
-  };
-  const handleCheckboxChange = (event) => {
-   const { value, checked } = event.target; 
-try {
- 
-  setCheckedFields((prevCheckedFields) => ({
-    ...prevCheckedFields,
-    [value]: checked
-  }));
-  }catch(error){
-  console.log("error al marcar los campos de la credencial", error);
+
   }
+
+  const handleCheckboxChange = (event) => {
+
+   const { value, checked } = event.target; 
+      try {
+    
+      setCheckedFields((prevCheckedFields) => ({
+        ...prevCheckedFields,
+        [value]: checked
+      }));
+      }catch(error){
+      console.log("error al marcar los campos de la credencial", error);
+      }
    
-  };
+  }
 
 
   const handleCheckboxVerification = () => {
-       // Verificar los checkboxes marcados y actualizar formData si es necesario
-      Object.keys(checkedFields).forEach((field) => {
-        if (checkedFields[field] && field in formDataImg) {
-          // Verificar si el campo está marcado y existe en formDataImg
-          setFormData((prevFormData) => ({
-            ...prevFormData,
-            [field]: formDataImg[field] // Actualizar el valor del campo con el valor de formDataImg
-          }));
+    // Verificar los checkboxes marcados y actualizar formData si es necesario
+    Object.keys(checkedFields).forEach((field) => {
+      if (checkedFields[field] && field in formDataImg) {
+        // Verificar si el campo está marcado y existe en formDataImg
+        let fieldValue = formDataImg[field];
+        // Convertir el campo fechaNacimiento a un objeto Date si es necesario
+        if (field === 'fechaNacimiento' && typeof fieldValue === 'string') {
+          fieldValue = parseFechaNacimiento(fieldValue);
+          if (!fieldValue) {
+            return; // No actualizar formData si la fecha no es válida
+          }
         }
-      });
-        // Cerrar el modal después de la verificación
-        handleCloseModal();
+       
+       if (field ==='estado' &&  Number.isInteger(fieldValue)){        
+        const Municipios = cargarMunicipios(fieldValue);
+        setMunicipios(Municipios);
+       }
+       if (field ==='genero' &&  typeof fieldValue === 'string'){        
+         switch (fieldValue) {
+          case "M":
+            fieldValue = 2
+            break;
+            case "H":
+            fieldValue = 1
+            break;
+            default:
+            fieldValue = ""
+            break;
+         }
+       }
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          [field]: fieldValue // Actualizar el valor del campo con el valor de formDataImg
+        }));
+
+        setCheckedFields((prevChecked) => ({
+          ...prevChecked,
+          [field]: false
+        }));
+      }
+    });
+    // Cerrar el modal después de la verificación
+    handleCloseModal();
   };
+
+      // Función para validar y convertir una cadena de fecha en un objeto Date válido
+    const parseFechaNacimiento = (fechaString) => {
+
+      const fechaNacimientoParts = fechaString.split("/");
+      if (fechaNacimientoParts.length === 3) {
+        const dia = parseInt(fechaNacimientoParts[0], 10);
+        const mes = parseInt(fechaNacimientoParts[1], 10) - 1; // Restamos 1 al mes porque los meses en JavaScript van de 0 a 11
+        const anio = parseInt(fechaNacimientoParts[2], 10);
+        const fecha = new Date(anio, mes, dia);
+        if (isNaN(fecha.getTime())) {
+          console.error('La fecha de nacimiento no es válida:', fechaString);
+          return null; // Devolver null si la fecha no es válida
+        }
+        return fecha;
+      }
+    }
 
   
 
-  if(loading && formData.nombre){
-    return "<CircularProgress />";
- }
-   
+
 
   return (
+ 
     <div>
+
+    {loading && formData.nombre ? (
+       formLoader()
+    ):(
       <GridContainer>
         <GridItem xs={12} sm={12} md={9}>
           <Card>
@@ -471,9 +542,19 @@ try {
               <h4 className={classes.cardTitleWhite}>Simpatizante</h4>
               <p className={classes.cardCategoryWhite}>Nuevo simpatizante</p>
               <div style={{ marginBottom: '10px',float: 'inline-end' }}>
-              <Button type="file" onChange={handleImageChange} accept="image/*" color="primary" size="sm" >Credencial (Frontal)</Button>
-              <Button color="primary" size="sm" >Credencial (Tracera))</Button>
-              <input  color="primary" size="sm" type="file" onChange={handleImageChange} accept="image/*" />
+             
+                <input accept="image/*" className="input-file" id="CredencialFrontal" onChange={handleImageChange} type="file" />
+                  <label htmlFor="CredencialFrontal">
+                    <Button variant="contained" color="primary" size="sm" component="span">
+                    Credencial (Frontal)
+                    </Button>
+                  </label>
+                <input accept="image/*" className="input-file" id="CredencialTracera" onChange={handleImageChange} type="file" />
+                  <label htmlFor="CredencialTracera">
+                    <Button variant="contained" color="primary" size="sm" component="span">
+                    Credencial (Tracera)
+                    </Button>
+                  </label>
                 </div>
             </CardHeader>
             <form onSubmit={handleSubmit}>
@@ -729,6 +810,17 @@ try {
                   />
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="CURP"
+                    id="curp"
+                    name="curp"
+                    inputProps={{ value : formData.curp , onChange: handleInputChange }}
+                    formControlProps={{
+                      fullWidth: true,
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
                     <Button color="primary" size="sm" variant="contained" onClick={handleOpenModalMapa}>
                     buscar mapa
                     </Button>
@@ -818,17 +910,15 @@ try {
       </Modal>
       </GridItem>
       <Snackbar
-        place="br"
-        color="danger"
+        place="tc"
+        color="warning"
         message={mensaje}
         open={bc}
         closeNotification={() => setBC(false)}
         close
       />
-      </GridContainer>
-
-      
-    
+      </GridContainer>      
+      )}
     </div>
 
   );

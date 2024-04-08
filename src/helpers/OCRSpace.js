@@ -118,32 +118,33 @@ try {
     }
   }
 
+  
   function getFechaNacimiento(lineas) {
     const nombreIndex = lineas.findIndex((line) =>
       line.includes("FECHA DE NACIMIENTO")
     );
     if (nombreIndex !== -1 && nombreIndex < lineas.length - 1) {
-      return lineas[nombreIndex + 1].trim();
+      return   lineas[nombreIndex + 1].trim();
     } else {
       return "";
     }
   }
+ 
 
   function getEstado(lineas) {
     const estadoIndex = lineas.findIndex((linea) => linea.includes("ESTADO"));
-    if (estadoIndex !== -1 && estadoIndex < lineas.length) {
-      const estadoLinea = lineas[estadoIndex].trim();
-      const numerosEstado = estadoLinea.match(/\d+/);
-      if (numerosEstado) {
-        return parseInt(numerosEstado[0], 10); // Devuelve el primer conjunto de números encontrado como entero
-      }
+    if (estadoIndex !== -1) {
+      const numerosEstado = lineas[estadoIndex].match(/\d+/);
+      if (numerosEstado) return parseInt(numerosEstado[0], 10);
+      const numerosEstadoSiguiente = lineas[estadoIndex + 1].match(/\d+/);
+      if (numerosEstadoSiguiente) return parseInt(numerosEstadoSiguiente[0], 10);
     }
     return "";
   }
 
   function getMunicipio(lineas) {
     const municipioIndex = lineas.findIndex((linea) =>
-      linea.includes("MUNICIPIO")
+      linea.includes("MUNICIPIO") || linea.includes("MUNIGIPIO")
     );
     if (municipioIndex !== -1 && municipioIndex < lineas.length) {
       const municipioLinea = lineas[municipioIndex].trim();
@@ -293,10 +294,10 @@ try {
 
 
       function getCurp(lineas) {
-        const curpIndex = lineas.findIndex(linea => linea.includes('CURP'));
+        const curpIndex = lineas.findIndex(linea => linea.includes('CURP') || linea.includes('CUAP'));
         if (curpIndex !== -1 && curpIndex < lineas.length) {
             const curpLinea = lineas[curpIndex].trim();
-            if (curpLinea.startsWith('CURP')) {
+            if (curpLinea.startsWith('CURP') || curpLinea.startsWith('CUAP')) {
                 const curpTexto = curpLinea.slice(4).trim();
                 if (curpTexto.length > 16) {
                     return curpTexto;
@@ -319,7 +320,7 @@ try {
   function getFechaRegistroIne(lineas) {
     try {
       const fechaRegistroIndex = lineas.findIndex((linea) =>
-        linea.includes("AÑO DE REGISTRO")
+        linea.includes("AÑO DE REGISTRO") || linea.includes("ANO DE REGISTRO")
       );
       if (fechaRegistroIndex !== -1) {
         // Buscar un conjunto de números después de "AÑO DE REGISTRO" en la misma línea
@@ -343,15 +344,24 @@ try {
       console.error("Error al buscar AÑO DE REGISTRO ", error);
     }
   }
+  
   function getGenero(lineas) {
-    const sexoIndex = lineas.findIndex((line) => line.includes("SEXO"));
-    if (sexoIndex !== -1 && sexoIndex < lineas.length - 1) {
+    let sexoIndex = lineas.findIndex((line) => line.includes("SEXO"));
+    if (sexoIndex !== -1) {
       const sexoLinea = lineas[sexoIndex].trim();
       // Buscar la letra "H" o "M" después de "SEXO"
       const letraSexo = sexoLinea.includes("H") ? "H" : "M";
       return letraSexo;
     } else {
-      return "";
+      // Si no se encuentra en la misma línea, buscar en la siguiente línea
+      sexoIndex = lineas.findIndex((line, index) => index === lineas.length - 1 ? false : lineas[index + 1].includes("SEXO"));
+      if (sexoIndex !== -1) {
+        const sexoLinea = lineas[sexoIndex + 1].trim();
+        const letraSexo = sexoLinea.includes("H") ? "H" : "M";
+        return letraSexo;
+      } else {
+        return "";
+      }
     }
   }
 

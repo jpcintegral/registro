@@ -59,7 +59,7 @@ RegularButton.propTypes = {
     "white",
     "transparent",
   ]),
-  size: PropTypes.oneOf(["sm", "lg"]),
+  size: PropTypes.oneOf(["sx","sm", "lg"]),
   simple: PropTypes.bool,
   round: PropTypes.bool,
   disabled: PropTypes.bool,
