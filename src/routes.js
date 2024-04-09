@@ -28,12 +28,12 @@ import LocationOn from "@material-ui/icons/LocationOn";
 import DashboardPage from "views/Dashboard/Dashboard.js";
 import Simpatizantes from "views/Simpatizante/Simpatizantes.js";
 import Simpatizante  from "views/Simpatizante/Simpatizante.js";
-import TableList from "views/TableList/TableList.js";
+//import TableList from "views/TableList/TableList.js";
 import UserSystems from "views/UserSystems/UserSystems.js";
 import UserForm from "views/UserSystems/UserForm.js";
 //import Typography from "views/Typography/Typography.js";
 import Icons from "views/Icons/Icons.js";
-import Maps from "views/Maps/Maps.js";
+import Maps from "views/Maps/MapaSimpatizante.js";
 //import NotificationsPage from "views/Notifications/Notifications.js";
 //import UpgradeToPro from "views/UpgradeToPro/UpgradeToPro.js";
 // core components/views for RTL layout
@@ -79,7 +79,7 @@ const dashboardRoutes = [
     icon: Person,
     component: Simpatizante,
     layout: "/admin",
-  },
+  },/*
   {
     path: "/table",
     name: "LISTA DE REGISTROS",
@@ -87,9 +87,9 @@ const dashboardRoutes = [
     icon: "content_paste",
     component: TableList,
     layout: "/admin",
-  },
+  },¨*/
     {
-    path: "/maps",
+    path: "/MapaSimpatizante",
     name: "MAPA SIMPATIZANTES",
     rtlName: "خرائط",
     icon: LocationOn,
