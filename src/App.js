@@ -13,6 +13,7 @@ import "assets/css/material-dashboard-react.css?v=1.10.0";
 import jwt from "jsonwebtoken";
 import Login from 'views/SignInSide/Login.js';
 import Snackbar from "components/Snackbar/Snackbar.js";
+import MapaSimpatizante from "views/Maps/MapaSimpatizante.js";
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -130,12 +131,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <Switch>
+        
         {loggedIn && <Route path="/admin" component={Admin} />}
         {loggedIn && <Route path="/rtl" component={RTL} />}
         {loggedIn && <Route path="/UserSystems" component={UserSystems} />}
         {loggedIn && <Route path="/UserForm/:userId?" component={UserForm} />}
         {loggedIn && <Route path="/Simpatizantes" component={Simpatizantes} />}
         {loggedIn && <Route path="/Simpatizante/:userId?" component={Simpatizante} />}
+        {loggedIn && <Route path="/MapaSimpatizante" component={MapaSimpatizante} />}
         {!loggedIn && <Route path="/" render={() => <SignInSide handleLogin={handleLogin} />} />}
         {showModal && (
           <div className="modal">
