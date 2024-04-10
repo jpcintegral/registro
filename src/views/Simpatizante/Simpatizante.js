@@ -26,6 +26,7 @@ import Map from "../Maps/Maps.js";
 import axios from "axios";
 import OCRSpace from "helpers/OCRSpace.js";
 import formLoader from "helpers/formLoader.js";
+import SpinnerOverlay from "helpers/SpinnerOverlay.js";
 import Modal from "components/Modal/Modal.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 import MapOutlinedIcon from '@material-ui/icons/MapOutlined'
@@ -77,6 +78,7 @@ export default function Simpatizante() {
   const [bc, setBC] = useState(false);
   const [idUsuarioAlta,setIdUsuarioAlta]= useState([]);
   const [idUsuarioUpdate,setIdUsuarioUpdate]= useState([]);
+  const [spinner,setSpinner]= useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     apellidoPaterno: "",
@@ -346,11 +348,20 @@ const handleInputChange = (e) => {
 
     const file = e.target.files[0];
       // Verificar si es un archivo de imagen válido
-   
+      setSpinner(true);
       setImage(URL.createObjectURL(file));
       const ocrs = await OCRSpace(file);
-      console.log(ocrs.fechaNacimiento);
-      setFormDataImg(ocrs);
+     
+     
+      // Verificar si OCR no trae datos
+     if (!ocrs || !Object.keys(ocrs).length) {
+       // Mostrar mensaje de advertencia
+       showBottomCenterNotification('No se detectaron datos en la credencial. Por favor, intenta seleccionarla nuevamente.');
+       setSpinner(false);
+       return; // Salir de la función
+     }
+     setFormDataImg(ocrs);
+     console.log("ocrs",ocrs);
       handleOpenModal();
       getBase64(file)
       .then(result => {
@@ -364,12 +375,13 @@ const handleInputChange = (e) => {
         console.log(err);
       });       
       e.target.value = null;
+      setSpinner(false);
       
   };
 
 
   const handleImageTraceraChange = async (e) => {
-
+    setSpinner(true);
     const file = e.target.files[0];
       // Verificar si es un archivo de imagen válido
       setImageTracera(URL.createObjectURL(file));
@@ -389,6 +401,7 @@ const handleInputChange = (e) => {
         console.log(err);
       });       
       e.target.value = null;
+      setSpinner(false);
       
   };
 
@@ -575,17 +588,18 @@ const handleInputChange = (e) => {
    }
 
   return (
- 
+ <>
     <div>
 
     {loading && formData.nombre ? (
        formLoader()
     ):(
       <GridContainer>
+         
         <GridItem xs={12} sm={12} md={9}>
           <Card>
             <CardHeader color="info">
-              <h4 className={classes.cardTitleWhite}>Simpatizante</h4>
+              <h4 className={classes.cardTitleWhite}>Simpatizante </h4>
               <p className={classes.cardCategoryWhite}>Nuevo simpatizante</p>
               <div style={{ marginBottom: '10px',float: 'inline-end' }}>
              
@@ -985,8 +999,10 @@ const handleInputChange = (e) => {
         close
       />
       </GridContainer>      
-      )}
+      )}      
     </div>
 
+    <SpinnerOverlay  open={spinner}/>
+</>
   );
 }

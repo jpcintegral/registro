@@ -14,6 +14,7 @@ import Snackbar from "components/Snackbar/Snackbar.js";
 import Button from "components/CustomButtons/Button.js";
 import CardFooter from "components/Card/CardFooter.js";
 import CardBody from "components/Card/CardBody.js";
+import SpinnerOverlay from "helpers/SpinnerOverlay.js";
 const styles = {
     cardCategoryWhite: {
       color: "rgba(255,255,255,.62)",
@@ -41,6 +42,7 @@ export default function MapaSipatizantes (){
     const [estados, setestados] = useState([]);
     const [mensaje, setMensaje] = useState(null);
     const [bc, setBC] = useState(false);
+    const [spinner,setSpinner]= useState(false);
     
     
     const [formDataFilter, setFormDataFilter] = useState({
@@ -189,7 +191,7 @@ export default function MapaSipatizantes (){
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setSpinner(true);
     try {
       // Validar que todos los campos obligatorios estén llenos
       const requiredFields = [  'genero',   'estado', 'municipio', 'colonia', 'calle',  'seccion', 'codigoPostal'];
@@ -197,7 +199,7 @@ export default function MapaSipatizantes (){
   
       if (missingFields.length === 0) {
         // Si faltan campos obligatorios, mostrar una notificación con los campos faltantes
-        const errorMessage = `Debe ingresar al menos un campo para realizar la búsqueda"`;
+        const errorMessage = `Debe ingresar al menos un campo para realizar la búsqueda`;
         showBottomCenterNotification(errorMessage);
       } else {
         const response = await axios.get("http://localhost:3800/api/simpatizantes/filtrosMapa",{params: formDataFilter});
@@ -218,10 +220,17 @@ export default function MapaSipatizantes (){
                 lat : data.lat
               });
             });
+            setMarkersData(newMarkersData);
+            setSpinner(false);
+          }else{
+            const errorMessage = "Los parámetros seleccionados no devolvieron datos, por favor selecciona otros parámetros";
+            showBottomCenterNotification(errorMessage);
+            setSpinner(false);
           }
-         setMarkersData(newMarkersData);
+         
       }
     } catch (error) {
+      setSpinner(false);
       console.error("Error handleSubmit:", error);
     }
   }
@@ -359,6 +368,8 @@ export default function MapaSipatizantes (){
         closeNotification={() => setBC(false)}
         close
       />
+
+<SpinnerOverlay  open={spinner}/>
     </div>
   );
 }

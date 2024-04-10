@@ -13,7 +13,7 @@ import CustomInput from "components/CustomInput/CustomInput.js";
 import * as XLSX from 'xlsx';
 import Modal from "components/Modal/Modal.js";
 import CardAvatar from "components/Card/CardAvatar.js";
-import avatar from "assets/img/faces/jpc.jpg";
+//import avatar from "assets/img/faces/jpc.jpg";
 import { ShimmerTable } from "react-shimmer-effects";
 import PropTypes from "prop-types";
 import EditIcon from '@material-ui/icons/Edit';
@@ -268,7 +268,7 @@ export default function UserSystems() {
           <Card profile>
             <CardAvatar profile>
               <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                <img src={avatar} alt="..." />
+                 
               </a>
             </CardAvatar>
             <CardBody profile >

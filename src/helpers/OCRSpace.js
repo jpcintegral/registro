@@ -46,7 +46,7 @@ try {
       console.log(response);
       const { ParsedResults } = response.data;
 
-      if (ParsedResults && ParsedResults.length > 0) {
+      if (ParsedResults && ParsedResults.length > 0 && ParsedResults[0].ParsedText.trim() !== "") {
         const { ParsedText } = ParsedResults[0];
         const updatedFormData = updateFormData(ParsedText, formData);
     

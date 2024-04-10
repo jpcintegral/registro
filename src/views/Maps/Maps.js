@@ -166,7 +166,6 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
         if (marker) {
           marker.bindPopup(`
            <b>Nombre:</b> ${nombre}<br/>
-           <b>Edad:</b> ${edad}<br/>
            <b>Estado:</b> ${state}<br/>
            <b>Municipio:</b> ${municipality}<br/>
            <b>Colonia:</b> ${neighborhood}<br/>
