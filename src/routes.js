@@ -19,7 +19,7 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
 //import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import BubbleChart from "@material-ui/icons/BubbleChart";
+//import BubbleChart from "@material-ui/icons/BubbleChart";
 import LocationOn from "@material-ui/icons/LocationOn";
 //import Notifications from "@material-ui/icons/Notifications";
 //import Unarchive from "@material-ui/icons/Unarchive";
@@ -32,7 +32,7 @@ import Simpatizante  from "views/Simpatizante/Simpatizante.js";
 import UserSystems from "views/UserSystems/UserSystems.js";
 import UserForm from "views/UserSystems/UserForm.js";
 //import Typography from "views/Typography/Typography.js";
-import Icons from "views/Icons/Icons.js";
+//import Icons from "views/Icons/Icons.js";
 import Maps from "views/Maps/MapaSimpatizante.js";
 //import NotificationsPage from "views/Notifications/Notifications.js";
 //import UpgradeToPro from "views/UpgradeToPro/UpgradeToPro.js";
@@ -95,7 +95,7 @@ const dashboardRoutes = [
     icon: LocationOn,
     component: Maps,
     layout: "/admin",
-  },
+  }, /*
   {
     path: "/icons",
     name: "ICONOS",
@@ -104,7 +104,7 @@ const dashboardRoutes = [
     component: Icons,
     layout: "/admin",
   },
- /* {
+  {
     path: "/notifications",
     name: "Notificaciones",
     rtlName: "إخطارات",
