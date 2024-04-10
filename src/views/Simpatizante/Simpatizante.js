@@ -28,6 +28,8 @@ import OCRSpace from "helpers/OCRSpace.js";
 import formLoader from "helpers/formLoader.js";
 import Modal from "components/Modal/Modal.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
+import MapOutlinedIcon from '@material-ui/icons/MapOutlined'
+import CreditCardOutlinedIcon from '@material-ui/icons/CreditCardOutlined';
 //import imageToBase64 from 'image-to-base64';
 const styles = {
   cardCategoryWhite: {
@@ -590,13 +592,13 @@ const handleInputChange = (e) => {
                 <input accept="image/*" className="input-file" id="CredencialFrontal" onChange={handleImageChange} type="file" />
                   <label htmlFor="CredencialFrontal">
                     <Button variant="contained" color="primary" size="sm" component="span">
-                    Credencial (Frontal)
+                    <CreditCardOutlinedIcon/>Credencial (Frontal)
                     </Button>
                   </label>
                 <input accept="image/*" className="input-file" id="CredencialTracera" onChange={handleImageTraceraChange} type="file" />
                   <label htmlFor="CredencialTracera">
                     <Button variant="contained" color="primary" size="sm" component="span">
-                    Credencial (Tracera)
+                    <CreditCardOutlinedIcon/>Credencial (Tracera)
                     </Button>
                   </label>
                 </div>
@@ -866,7 +868,7 @@ const handleInputChange = (e) => {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                     <Button color="primary" size="sm" variant="contained" onClick={handleOpenModalMapa}>
-                    buscar mapa
+                    <MapOutlinedIcon/>buscar mapa
                     </Button>
               </GridItem>
               </GridContainer>

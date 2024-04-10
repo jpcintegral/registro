@@ -16,7 +16,10 @@ import CardAvatar from "components/Card/CardAvatar.js";
 import avatar from "assets/img/faces/jpc.jpg";
 import { ShimmerTable } from "react-shimmer-effects";
 import PropTypes from "prop-types";
-
+import EditIcon from '@material-ui/icons/Edit';
+import Visibility from '@material-ui/icons/Visibility';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileDownload from '@material-ui/icons/GetApp';
 //import UserForm from "path/to/UserForm"; // Ruta al componente UserForm
 
 const styles = {
@@ -65,11 +68,8 @@ const estatusMap = {
     "2": "Mujer",
     "3": "Otro"
     }
-export default function UserSystems(props) {
-  const { userId, perfil } = props;
-  console.log("userId",userId);
-   console.log("perfil",perfil);
-  const history = useHistory();
+export default function UserSystems() {
+    const history = useHistory();
   const classes = useStyles();
  
    
@@ -207,8 +207,8 @@ export default function UserSystems(props) {
           <CardHeader color="info">
             <h4 className={classes.cardTitleWhite}>  Lista de usuarios registrados</h4>
             <p >
-            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredUsers)}>Descargar Tabla</Button>
-            <Button color="primary" size="sm" onClick={() => exportToExcelBase(users)}>Descargar Base</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredUsers)}><FileDownload/>Descargar Tabla</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelBase(users)}><FileDownload/>Descargar Base</Button>
             </p>
           </CardHeader>
           <CardBody>
@@ -254,9 +254,9 @@ export default function UserSystems(props) {
                 user.estatus && estatusMap[user.estatus],
                 user.tipoCuenta && tipoCuentaMap[user.tipoCuenta],
                 <React.Fragment key={user._id}>
-                  <Button color="primary" size="sm" onClick={() => handleDetail(user._id)}>Detalle</Button>
-                  <Button color="primary" size="sm" onClick={() => handleUpdate(user._id)}>Actualizar</Button>
-                  <Button color="primary" size="sm" onClick={() => handleDelete(user._id)}>Eliminar</Button>
+                  <Button color="primary" size="sm" onClick={() => handleDetail(user._id)}><Visibility/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleUpdate(user._id)}><EditIcon/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleDelete(user._id)}><DeleteIcon/></Button>
                 </React.Fragment>
               ])}
             />

@@ -9,7 +9,7 @@ import UserForm from "views/UserSystems/UserForm.js";
 import Simpatizantes from "views/Simpatizante/Simpatizantes.js";
 import Simpatizante from "views/Simpatizante/Simpatizante.js";
 
-import "assets/css/material-dashboard-react.css?v=1.10.0";
+import "./assets/css/material-dashboard-react.css?v=1.10.0";
 import jwt from "jsonwebtoken";
 import Login from 'views/SignInSide/Login.js';
 import Snackbar from "components/Snackbar/Snackbar.js";

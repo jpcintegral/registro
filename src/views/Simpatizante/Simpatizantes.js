@@ -13,6 +13,10 @@ import * as XLSX from 'xlsx';
 import CustomInput from "components/CustomInput/CustomInput.js";
 import Modal from "components/Modal/Modal.js";
 import { ShimmerTable } from "react-shimmer-effects";
+import EditIcon from '@material-ui/icons/Edit';
+import Visibility from '@material-ui/icons/Visibility';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileDownload from '@material-ui/icons/GetApp';
 //import jsPDF from 'jspdf';
 
 //import avatar from "assets/img/faces/jpc.jpg";
@@ -209,8 +213,8 @@ export default function Simpatizantes() {
             <h4 className={classes.cardTitleWhite}>Lista de simpatizantes registrados</h4>
             
             <p >
-            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}>Descargar Tabla</Button>
-            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}>Descargar Base</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}><FileDownload/>Descargar Tabla</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}><FileDownload/>Descargar Base</Button>
             </p>
           
           </CardHeader>
@@ -227,7 +231,7 @@ export default function Simpatizantes() {
                   />
             </div>
             <Table
-              tableHeaderColor="info"
+              tableHeaderColor="gray"
               tableHead={[
                 "Nombre",
                 "Género",
@@ -243,7 +247,7 @@ export default function Simpatizantes() {
                 "Acciones"
               ]}
               tableData={filteredSimpatizantes.map((simpatizante) => [
-                [simpatizante.nombre, simpatizante.apellidoPaterno, simpatizante.apellidoMaterno].join(' '),
+                `${simpatizante.nombre} ${simpatizante.apellidoPaterno} ${simpatizante.apellidoMaterno}` ,
                 simpatizante.genero && generoMap[simpatizante.genero],
                 simpatizante.email,
                 simpatizante.fechaNacimiento ? new Date(simpatizante.fechaNacimiento).toLocaleDateString('es-MX') : '',
@@ -256,9 +260,9 @@ export default function Simpatizantes() {
                 simpatizante.estatus && estatusMap[simpatizante.estatus],
                 
                 <React.Fragment key={simpatizante._id}>
-                  <Button color="primary" size="sm" onClick={() => handleDetail(simpatizante._id)}>Detalle</Button>
-                  <Button color="primary" size="sm" onClick={() => handleUpdate(simpatizante._id)}>Actualizar</Button>
-                  <Button color="primary" size="sm" onClick={() => handleDelete(simpatizante._id)}>Eliminar</Button>
+                  <Button color="primary" size="sm" onClick={() => handleDetail(simpatizante._id)}><Visibility/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleUpdate(simpatizante._id)}><EditIcon/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleDelete(simpatizante._id)}><DeleteIcon/></Button>
                 </React.Fragment>
               ])}
             />

@@ -1,7 +1,7 @@
 {
-  "name": "material-dashboard-react",
+  "name": "registro",
   "version": "1.10.0",
-  "description": "Material Dashboard React. Coded by Creative Tim",
+  "description": "Registro",
   "private": false,
   "main": "dist/index.js",
   "dependencies": {
@@ -58,7 +58,7 @@
   "bugs": {
     "url": "https://github.com/creativetimofficial/material-dashboard-react/issues"
   },
-  "homepage": "https://creativetimofficial.github.io/material-dashboard-react/#/dashboard",
+  
   "optionalDependencies": {
     "@babel/core": "7.14.0",
     "typescript": "4.2.4"

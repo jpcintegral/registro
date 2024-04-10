@@ -31,7 +31,7 @@ try {
     const keyOcer=process.env.REACT_APP_SECRET_KEY_OCR;
     const config = {
       method: "post",
-      url: "https://apipro1.ocr.space/parse/image", // "https://api.ocr.space/parse/image",
+      url: "https://apipro2.ocr.space/parse/image", // "https://api.ocr.space/parse/image",
       headers: {
         apikey:keyOcer , // Reemplaza "YOUR_API_KEY" con tu clave de API OCR.space
         "Content-Type": "multipart/form-data"
