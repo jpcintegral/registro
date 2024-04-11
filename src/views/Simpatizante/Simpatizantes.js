@@ -17,6 +17,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import Visibility from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileDownload from '@material-ui/icons/GetApp';
+import jwt from 'jsonwebtoken';
 //import jsPDF from 'jspdf';
 
 //import avatar from "assets/img/faces/jpc.jpg";
@@ -56,6 +57,8 @@ const styles = {
 const useStyles = makeStyles(styles);
 
 export default function Simpatizantes() {
+  const key = process.env.REACT_APP_SECRET_KEY;  
+  const admin= process.env.REACT_APP_ADMIN;
   const history = useHistory();
   const classes = useStyles();
   const [simpatizantes, setSimpatizantes] = useState([]);
@@ -66,6 +69,8 @@ export default function Simpatizantes() {
   const [openModal, setOpenModal] = useState(false);
   const [detalleUsuario,setDetalleUsuario]=useState(null);
   const [idUsuarioBaja,setIdUsuarioBaja]= useState([]);
+  const [perfil, setPerfil] = useState(0);
+  
 
   const fetchSimpatizantes = async () => {
     try {
@@ -96,11 +101,53 @@ export default function Simpatizantes() {
    }
 
   useEffect(() => {
-    setIdUsuarioBaja("65f4b7048317e1d5dbc1807a");
+  
     fetchSimpatizantes();
     getEstados();
     getMunicipos();
+      // Llamar a la función para decodificar y asignar los valores de la cookie
+     decodeAndSetValuesFromCookie();
   }, []);
+
+  const getCookie = (name) => {
+    const cookieName = name + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(";");
+  
+    for (let i = 0; i < cookieArray.length; i++) {
+      let cookie = cookieArray[i];
+      while (cookie.charAt(0) === " ") {
+        cookie = cookie.substring(1);
+      }
+      if (cookie.indexOf(cookieName) === 0) {
+        return cookie.substring(cookieName.length, cookie.length);
+      }
+    }
+    return "";
+  };
+  
+  const decodeAndSetValuesFromCookie = () => {
+    const token = getCookie('token'); // Reemplaza 'your_cookie_name' con el nombre real de tu cookie
+    if (token) {
+      try {
+        const decodedToken =jwt.verify(token,key);
+        if (decodedToken) {
+          const { user, perfil } = decodedToken.data;
+          // Asignar los valores de user y perfil a las variables
+          setIdUsuarioBaja(user);
+          setPerfil(perfil);
+        }
+      } catch (error) {
+        console.error('Error al decodificar el token:', error);
+      }
+    } else {
+      console.error('La cookie no fue encontrada o está vacía.');
+    }
+  };
+  
+ 
+
+
   const handleOpenModal = () => {
     setOpenModal(true);
   };
@@ -213,8 +260,8 @@ export default function Simpatizantes() {
             <h4 className={classes.cardTitleWhite}>Lista de simpatizantes registrados</h4>
             
             <p >
-            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}><FileDownload/>Descargar Tabla</Button>
-            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}><FileDownload/>Descargar Base</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}  disabled={admin !== perfil}><FileDownload/>Descargar Tabla</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}  disabled={admin !== perfil}><FileDownload/>Descargar Base</Button>
             </p>
           
           </CardHeader>
@@ -262,7 +309,7 @@ export default function Simpatizantes() {
                 <React.Fragment key={simpatizante._id}>
                   <Button color="primary" size="sm" onClick={() => handleDetail(simpatizante._id)}><Visibility/></Button>
                   <Button color="primary" size="sm" onClick={() => handleUpdate(simpatizante._id)}><EditIcon/></Button>
-                  <Button color="primary" size="sm" onClick={() => handleDelete(simpatizante._id)}><DeleteIcon/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleDelete(simpatizante._id)} disabled={admin !== perfil}><DeleteIcon/></Button>
                 </React.Fragment>
               ])}
             />
@@ -299,7 +346,7 @@ export default function Simpatizantes() {
             )}         
         </GridItem>
         <GridItem xs={12}>
-        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF}>
+        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF} disabled={admin !== perfil}>
           Imprimir
         </Button> 
         </GridItem>

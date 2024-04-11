@@ -10,9 +10,7 @@ const Login = async (usuario, password) => {
         email: usuario,
         password
       }
-      const key = process.env.REACT_APP_SECRET_KEY;
-      console.log("Data: "+ JSON.stringify(data));
-        
+      const key = process.env.REACT_APP_SECRET_KEY;     
       const token = jwt.sign(data, key, { expiresIn: '1h' });
      
     // Paso 2: Consultar el login con el token JWT

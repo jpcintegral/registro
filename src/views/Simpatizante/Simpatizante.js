@@ -31,6 +31,7 @@ import Modal from "components/Modal/Modal.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 import MapOutlinedIcon from '@material-ui/icons/MapOutlined'
 import CreditCardOutlinedIcon from '@material-ui/icons/CreditCardOutlined';
+import jwt from 'jsonwebtoken';
 //import imageToBase64 from 'image-to-base64';
 const styles = {
   cardCategoryWhite: {
@@ -56,6 +57,7 @@ const styles = {
 const useStyles = makeStyles(styles);
 
 export default function Simpatizante() {
+  const key = process.env.REACT_APP_SECRET_KEY;  
   const history = useHistory();
   const classes = useStyles();
   
@@ -69,7 +71,6 @@ export default function Simpatizante() {
   const [imageTracera, setImageTracera] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [openModalMapa, setOpenModalMapa] = useState(false);
-  
   const { userId } = useParams();
   //const [perfil, setPerfil] = useState(1);
   const [formDataImg, setFormDataImg] = useState(null);
@@ -113,8 +114,7 @@ export default function Simpatizante() {
   
   useEffect(() => {
     // Actualizar el estado markersData con los nuevos valores de city, country y postalCode
-    setIdUsuarioAlta("65f4b7048317e1d5dbc1807a");
-    setIdUsuarioUpdate("65f4b7048317e1d5dbc1807a")
+  
 
         if (userId && userId !== ":userId") {
           setLoading(true);
@@ -154,9 +154,49 @@ export default function Simpatizante() {
       }
       // Llamar a la función para cargar los estados
         cargarEstados();     
-               
+        decodeAndSetValuesFromCookie();
       }, [userId]);
 
+
+
+      const getCookie = (name) => {
+        const cookieName = name + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookieArray = decodedCookie.split(";");
+      
+        for (let i = 0; i < cookieArray.length; i++) {
+          let cookie = cookieArray[i];
+          while (cookie.charAt(0) === " ") {
+            cookie = cookie.substring(1);
+          }
+          if (cookie.indexOf(cookieName) === 0) {
+            return cookie.substring(cookieName.length, cookie.length);
+          }
+        }
+        return "";
+      };
+      
+      const decodeAndSetValuesFromCookie = () => {
+        const token = getCookie('token'); // Reemplaza 'your_cookie_name' con el nombre real de tu cookie
+        if (token) {
+          try {
+            const decodedToken = jwt.verify(token,key);
+            if (decodedToken) {
+              const { user } = decodedToken.data;
+              // Asignar los valores de user y perfil a las variables
+              setIdUsuarioAlta(user);
+              setIdUsuarioUpdate(user);
+              //setPerfil(perfil);
+            }
+          } catch (error) {
+            console.error('Error al decodificar el token:', error);
+          }
+        } else {
+          console.error('La cookie no fue encontrada o está vacía.');
+        }
+      };
+      
+ 
 
   // Método para insertar un nuevo simpatizante
   const insertSimpatizante = async (formData) => {

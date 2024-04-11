@@ -15,6 +15,7 @@ import Login from 'views/SignInSide/Login.js';
 import Snackbar from "components/Snackbar/Snackbar.js";
 import MapaSimpatizante from "views/Maps/MapaSimpatizante.js";
 export default function App() {
+  const key = process.env.REACT_APP_SECRET_KEY;     
   const [loggedIn, setLoggedIn] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(null);
@@ -40,7 +41,7 @@ export default function App() {
     } else {
       // Verificar si el token es válido
       try {
-        const decodedToken = jwt.decode(token);
+        const decodedToken = jwt.verify(token,key);
         const expirationTime = decodedToken.exp * 1000; // Convertir a milisegundos
         const currentTime = Date.now();
         const timeRemaining = expirationTime - currentTime;

@@ -11,6 +11,7 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import axios from "axios";
+import jwt from 'jsonwebtoken';
 
 const useStyles = makeStyles({
   // Estilos
@@ -18,6 +19,8 @@ const useStyles = makeStyles({
 
 
 export default function UserForm() {
+  const key = process.env.REACT_APP_SECRET_KEY;  
+  const admin= process.env.REACT_APP_ADMIN;
     const classes = useStyles();
     const history = useHistory();
     const [loading, setLoading] = useState(false);
@@ -49,8 +52,7 @@ export default function UserForm() {
    
   
     useEffect(() => {
-      setIdUsuarioAlta("65f4b7048317e1d5dbc1807a");
-      setIdUsuarioUpdate("65f4b7048317e1d5dbc1807a")
+      
         if (userId && (userId!=":userId")) {
             setLoading(true);
            
@@ -112,9 +114,50 @@ export default function UserForm() {
               }
          // Llamar a la función para cargar los estados
          cargarEstados();     
-         setPerfil(1);
+         
+          // Llamar a la función para decodificar y asignar los valores de la cookie
+        decodeAndSetValuesFromCookie();
          
       }, [userId]);
+
+      const getCookie = (name) => {
+        const cookieName = name + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookieArray = decodedCookie.split(";");
+      
+        for (let i = 0; i < cookieArray.length; i++) {
+          let cookie = cookieArray[i];
+          while (cookie.charAt(0) === " ") {
+            cookie = cookie.substring(1);
+          }
+          if (cookie.indexOf(cookieName) === 0) {
+            return cookie.substring(cookieName.length, cookie.length);
+          }
+        }
+        return "";
+      };
+      
+      const decodeAndSetValuesFromCookie = () => {
+        const token = getCookie('token'); // Reemplaza 'your_cookie_name' con el nombre real de tu cookie
+        if (token) {
+          try {
+            const decodedToken = jwt.verify(token,key);
+            if (decodedToken) {
+              const { user } = decodedToken.data;
+              // Asignar los valores de user y perfil a las variables
+              setIdUsuarioAlta(user);
+              setIdUsuarioUpdate(user);
+              setPerfil(perfil);
+            }
+          } catch (error) {
+            console.error('Error al decodificar el token:', error);
+          }
+        } else {
+          console.error('La cookie no fue encontrada o está vacía.');
+        }
+      };
+      
+     
       
     const handleInputChange = (e) => {
          console.log("done");
@@ -392,7 +435,7 @@ async function cargarMunicipios(idEstado) {
                     ))}
                     </CustomDropdown>
                   </GridItem>
-                  <GridItem xs={12} sm={12} md={4}  style={{ display: perfil === 1 ? 'block' : 'none' }}>
+                  <GridItem xs={12} sm={12} md={4}  style={{ display: perfil === admin ? 'block' : 'none' }}>
                     <CustomInput
                       labelText="Contraseña"
                       name="password"
