@@ -12,6 +12,8 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import axios from "axios";
 import jwt from 'jsonwebtoken';
+import Snackbar from "components/Snackbar/Snackbar.js";
+import SpinnerOverlay from "helpers/SpinnerOverlay.js";
 
 const useStyles = makeStyles({
   // Estilos
@@ -19,6 +21,7 @@ const useStyles = makeStyles({
 
 
 export default function UserForm() {
+  const url=process.env.REACT_APP_API_URL;
   const key = process.env.REACT_APP_SECRET_KEY;  
   const admin= process.env.REACT_APP_ADMIN;
     const classes = useStyles();
@@ -29,7 +32,10 @@ export default function UserForm() {
     const [municipio, setMunicipios] = useState([]);
     const [perfil, setPerfil] = useState(1);
     const [idUsuarioAlta,setIdUsuarioAlta]= useState([]);
-     const [idUsuarioUpdate,setIdUsuarioUpdate]= useState([]);
+    const [idUsuarioUpdate,setIdUsuarioUpdate]= useState([]);
+    const [mensaje, setMensaje] = useState(null);
+    const [bc, setBC] = useState(false);
+    const [spinner,setSpinner]= useState(false);
     const [formData, setFormData] = useState({
       nombre: "",
       apellidoPaterno: "",
@@ -57,7 +63,7 @@ export default function UserForm() {
             setLoading(true);
            
           // Si hay un ID en los parámetros de la URL, obtén los datos del usuario
-          axios.get(`http://localhost:3800/api/user/${userId}`)
+          axios.get(`${url}/api/user/${userId}`)
             .then(response => {
               const userData = response.data;
               // Almacena temporalmente los datos del usuario en un objeto
@@ -95,7 +101,7 @@ export default function UserForm() {
                 // Método para obtener los estados desde la API
                 async function obtenerEstados() {
                   try {
-                    const response = await axios.get('http://localhost:3800/api/estados');
+                    const response = await axios.get(`${url}/api/estados`);
                     return response.data.map((estado) => ({ idEstado: estado.idEstado, nombre: estado.nombre }));
                   } catch (error) {
                     console.error('Error al obtener los estados:', error);
@@ -172,33 +178,55 @@ export default function UserForm() {
   
     const handleSubmit = async (e) => {
       e.preventDefault();
+      setSpinner(true);
       try {
-        if (userId && userId != ":userId"  ) {
-          // Si hay un ID en los parámetros de la URL, es una actualización
-          await updateUsuario(formData);
-          console.log("Usuario actualizado:", formData);
-          history.push("/admin/UserSystems"); // Redirige a la ruta /admin/UserSystems
-        } else {
-          // Si no hay un ID en los parámetros de la URL, es una inserción
-          await insertUsuario(formData);
-          history.push("/admin/UserSystems");
-          console.log("Usuario agregado:", formData);
-        }
+          // Validar que todos los campos obligatorios estén llenos
+          const requiredFields = ['nombre', 'apellidoPaterno', 'apellidoMaterno', 'genero', 'telefono', 'email', 'fechaNacimiento', 'estado', 'municipio', 'colonia',  'codigoPostal'];
+          const missingFields = requiredFields.filter(field => !formData[field]);
+          if (missingFields.length > 0) {
+            // Si faltan campos obligatorios, mostrar una notificación con los campos faltantes
+            const errorMessage = `Los siguientes campos son obligatorios: ${missingFields.join(', ')}`;
+            showBottomCenterNotification(errorMessage);
+          } else {
+            if (userId && userId != ":userId"  ) {
+              // Si hay un ID en los parámetros de la URL, es una actualización
+              await updateUsuario(formData);
+               history.push("/admin/UserSystems"); // Redirige a la ruta /admin/UserSystems
+              showBottomCenterNotification("Usuario actualizado");
+            } else {
+              // Si no hay un ID en los parámetros de la URL, es una inserción
+              await insertUsuario(formData);
+              history.push("/admin/UserSystems");
+              showBottomCenterNotification("Usuario actualizado");
+            }
+          }
+          setSpinner(false);
       } catch (error) {
         console.error("Error:", error);
+        showBottomCenterNotification("Por el momento no es posible realizar esta acción en el sistema.");
+        setSpinner(true)
       }
     };
+    const showBottomCenterNotification = (message) => {
+      // Mostrar la notificación en la parte inferior central
+      setMensaje(message);
+      setBC(true);
+      setTimeout(() => {
+        setBC(false);     
+      }, 9000);
+    };
+  
   
     const updateUsuario = async (userData) => {
       userData.idUsuarioUpdate=idUsuarioUpdate;
       // Lógica para actualizar el usuario en el backend
-       await axios.put(`http://localhost:3800/api/user/${userId}`, userData);
+       await axios.put(`${url}/api/user/${userId}`, userData);
     };
   
     const insertUsuario = async (userData) => {
       userData.idUsuarioAlta=idUsuarioAlta;
       // Lógica para insertar un nuevo usuario en el backend
-      await axios.post("http://localhost:3800/api/user", userData);
+      await axios.post(`${url}/api/user`, userData);
     };
   
     if(loading && formData.nombre){
@@ -212,7 +240,7 @@ export default function UserForm() {
  // Método para obtener los municipios de un estado específico desde la API
  async function obtenerMunicipios(idEstado) {
   try {
-    const response = await axios.get(`http://localhost:3800/api/municipios/${idEstado}`);
+    const response = await axios.get(`${url}/api/municipios/${idEstado}`);
     return response.data.map((municipio) => ({ idMunicipio: municipio.idMunicipio, nombre: municipio.nombre }));
   } catch (error) {
     console.error('Error al obtener los municipios:', error);
@@ -466,6 +494,15 @@ async function cargarMunicipios(idEstado) {
             </CardBody>
           </Card>
         </GridItem>
+        <Snackbar
+        place="tc"
+        color="warning"
+        message={mensaje}
+        open={bc}
+        closeNotification={() => setBC(false)}
+        close
+      />
+      <SpinnerOverlay  open={spinner}/>
       </GridContainer>
     </div>
   );

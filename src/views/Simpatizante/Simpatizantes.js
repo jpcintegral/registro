@@ -18,6 +18,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileDownload from '@material-ui/icons/GetApp';
 import jwt from 'jsonwebtoken';
+import SpinnerOverlay from "helpers/SpinnerOverlay.js";
 //import jsPDF from 'jspdf';
 
 //import avatar from "assets/img/faces/jpc.jpg";
@@ -59,6 +60,7 @@ const useStyles = makeStyles(styles);
 export default function Simpatizantes() {
   const key = process.env.REACT_APP_SECRET_KEY;  
   const admin= process.env.REACT_APP_ADMIN;
+  const url=process.env.REACT_APP_API_URL;
   const history = useHistory();
   const classes = useStyles();
   const [simpatizantes, setSimpatizantes] = useState([]);
@@ -70,11 +72,12 @@ export default function Simpatizantes() {
   const [detalleUsuario,setDetalleUsuario]=useState(null);
   const [idUsuarioBaja,setIdUsuarioBaja]= useState([]);
   const [perfil, setPerfil] = useState(0);
+  const [spinner,setSpinner]= useState(false);
   
 
   const fetchSimpatizantes = async () => {
     try {
-      const response = await axios.get("http://localhost:3800/api/simpatizantes");
+      const response = await axios.get(`${url}/api/getActiveSimpatizantesExcludingImages`);
       setSimpatizantes(response.data);
       setLoading(false);
     } catch (error) {
@@ -84,7 +87,7 @@ export default function Simpatizantes() {
 
    const getEstados = async () =>{
     try {
-      const responseEstados= await axios.get("http://localhost:3800/api/estados");
+      const responseEstados= await axios.get(`${url}/api/estados`);
       setEstadosList(responseEstados.data);
     } catch(error) {
       console.error("Errro get estados:", error);
@@ -93,13 +96,30 @@ export default function Simpatizantes() {
 
    const getMunicipos = async () =>{
     try {
-      const responseMunicipios= await axios.get("http://localhost:3800/api/municipios");
+      const responseMunicipios= await axios.get(`${url}/api/municipios`);
       setMunicipiosList(responseMunicipios.data);
     } catch(error) {
       console.error("Errro get estados:", error);
     }
    }
 
+   const getSimpatizante = async (idSimpatiZante) => {
+    try {
+      await axios.get(`${url}/api/simpatizantes/${idSimpatiZante}`)
+      .then(response => {      
+        setDetalleUsuario(response.data);  
+        setSpinner(false);  
+        handleOpenModal();   
+      })
+      .catch(error => {
+        setSpinner(false); 
+        console.error("Error al obtener datos del simpatizante:", error);        
+      });  
+    } catch (error) {
+      setSpinner(false); 
+      console.error("Error fetching simpatizantes:", error);
+    }
+  };
   useEffect(() => {
   
     fetchSimpatizantes();
@@ -155,24 +175,29 @@ export default function Simpatizantes() {
     setOpenModal(false);
   };
   const handleDetail = (simpatizanteId) => {
+    setSpinner(true);
+    setDetalleUsuario(null);  
    // Lógica para mostrar detalles del simpatizante
-    const detalleUsuario = simpatizantes.find(user => user._id === simpatizanteId);
-    setDetalleUsuario(detalleUsuario);
-    handleOpenModal();
+    getSimpatizante(simpatizanteId)    
+   
+    
   };
 
   const handleUpdate = (simpatizanteId) => {
+    setSpinner(true);
     // Lógica para actualizar el simpatizante
     history.push(`/admin/Simpatizante/${simpatizanteId}`); // Suponiendo que `/simpatizante-form/:simpatizanteId` es la ruta para el formulario SimpatizanteForm
   };
 
   const handleDelete = async (simpatizanteId) => {
+    setSpinner(true);
     try {
-      await axios.put(`http://localhost:3800/api/simpatizantes/desactivar/${simpatizanteId}/${idUsuarioBaja}`);
+      await axios.put(`${url}/api/simpatizantes/desactivar/${simpatizanteId}/${idUsuarioBaja}`);
       const updatedSimpatizantes = simpatizantes.filter(simpatizante => simpatizante._id !== simpatizanteId);
       setSimpatizantes(updatedSimpatizantes);
-     
+      setSpinner(false);
     } catch (error) {
+      setSpinner(false);
       console.error("Error deleting simpatizante:", error);
     }
   };
@@ -203,6 +228,7 @@ export default function Simpatizantes() {
     }
 
     const exportToExcelFilter = (data) => {
+      
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Simpatizantes");
@@ -210,11 +236,15 @@ export default function Simpatizantes() {
     };
 
     const exportToExcelBase = (data) => {
-      const ws = XLSX.utils.json_to_sheet(data);
+      setSpinner(true);
+       // Crear una copia de los datos para evitar modificar el original
+       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Simpatizantes");
       XLSX.writeFile(wb, "simpatizantesBase.xlsx");
+      setSpinner(false);
     };
+
     const filteredSimpatizantes = simpatizantes.filter(simpatizante =>
       Object.values(simpatizante).some(field =>
         String(field).toLowerCase().includes(filterValue.toLowerCase())
@@ -237,13 +267,13 @@ export default function Simpatizantes() {
     
       // Renderizar la imagen si la cadena base64 es válida
       return (
-        <div>
+        <>
            {base64Img ? (
             <img src={base64Img} alt="Credencial" className="img-elector" />
           ) : (
             ""
           )}
-        </div>
+        </>
       );
     }
 
@@ -260,8 +290,8 @@ export default function Simpatizantes() {
             <h4 className={classes.cardTitleWhite}>Lista de simpatizantes registrados</h4>
             
             <p >
-            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}  disabled={admin !== perfil}><FileDownload/>Descargar Tabla</Button>
-            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}  disabled={admin !== perfil}><FileDownload/>Descargar Base</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredSimpatizantes)}  disabled={admin != perfil}><FileDownload/>Descargar Tabla</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelBase(simpatizantes)}  disabled={admin != perfil}><FileDownload/>Descargar Base</Button>
             </p>
           
           </CardHeader>
@@ -309,7 +339,7 @@ export default function Simpatizantes() {
                 <React.Fragment key={simpatizante._id}>
                   <Button color="primary" size="sm" onClick={() => handleDetail(simpatizante._id)}><Visibility/></Button>
                   <Button color="primary" size="sm" onClick={() => handleUpdate(simpatizante._id)}><EditIcon/></Button>
-                  <Button color="primary" size="sm" onClick={() => handleDelete(simpatizante._id)} disabled={admin !== perfil}><DeleteIcon/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleDelete(simpatizante._id)} disabled={admin != perfil}><DeleteIcon/></Button>
                 </React.Fragment>
               ])}
             />
@@ -317,11 +347,7 @@ export default function Simpatizantes() {
         </Card>
       </GridItem>
       <Modal open={openModal} onClose={handleCloseModal} title="Detalle">
-        <GridItem xs={4} sm={4} md={4}>
-        
-                    { detalleUsuario && ( Simpatizante(detalleUsuario.imgElectorFrontal) )}
-                 
-        </GridItem>
+      <GridItem xs={6} sm={6} md={6}>{ detalleUsuario && ( Simpatizante(detalleUsuario.imgElectorFrontal) )}</GridItem>
       <GridItem xs={12} sm={12} md={12}>            
                
               {detalleUsuario && (
@@ -346,12 +372,12 @@ export default function Simpatizantes() {
             )}         
         </GridItem>
         <GridItem xs={12}>
-        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF} disabled={admin !== perfil}>
+        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF} disabled={admin != perfil}>
           Imprimir
         </Button> 
         </GridItem>
       </Modal>    
-
+      <SpinnerOverlay  open={spinner}/>
     </GridContainer>
   );
 }

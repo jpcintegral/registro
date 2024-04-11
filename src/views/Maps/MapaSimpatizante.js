@@ -37,6 +37,7 @@ const styles = {
 
 const useStyles = makeStyles(styles);
 export default function MapaSipatizantes (){
+  const url=process.env.REACT_APP_API_URL;
     const classes = useStyles();
     const [municipio, setMunicipios] = useState([]);
     const [estados, setestados] = useState([]);
@@ -83,7 +84,7 @@ export default function MapaSipatizantes (){
   useEffect(() => {
     async function obtenerEstados() {
         try {
-          const response = await axios.get('http://localhost:3800/api/estados');
+          const response = await axios.get(`${url}/api/estados`);
           return response.data.map((estado) => ({ idEstado: estado.idEstado, nombre: estado.nombre }));
         } catch (error) {
           console.error('Error al obtener los estados:', error);
@@ -114,7 +115,7 @@ export default function MapaSipatizantes (){
  // Método para obtener los municipios de un estado específico desde la API
  async function obtenerMunicipios(idEstado) {
     try {
-      const response = await axios.get(`http://localhost:3800/api/municipios/${idEstado}`);
+      const response = await axios.get(`${url}/api/municipios/${idEstado}`);
       return response.data.map((municipio) => ({ idMunicipio: municipio.idMunicipio, nombre: municipio.nombre }));
     } catch (error) {
       console.error('Error al obtener los municipios:', error);
@@ -202,7 +203,7 @@ export default function MapaSipatizantes (){
         const errorMessage = `Debe ingresar al menos un campo para realizar la búsqueda`;
         showBottomCenterNotification(errorMessage);
       } else {
-        const response = await axios.get("http://localhost:3800/api/simpatizantes/filtrosMapa",{params: formDataFilter});
+        const response = await axios.get(`${url}/api/simpatizantes/filtrosMapa`,{params: formDataFilter});
       
         const newMarkersData = [];
         if (response && response.data.length > 0) {

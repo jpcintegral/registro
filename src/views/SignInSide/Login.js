@@ -3,6 +3,7 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 
 const Login = async (usuario, password) => {
+const url=process.env.REACT_APP_API_URL;
   try {
     // Paso 1: Crear un token JWT con usuario y contraseña
     let data = {
@@ -15,7 +16,7 @@ const Login = async (usuario, password) => {
      
     // Paso 2: Consultar el login con el token JWT
     
-     const response = await axios.post('http://localhost:3800/api/login',{token: token});
+     const response = await axios.post(`${url}/api/login`,{token: token});
 
     // Paso 3: Verificar si la API devuelve un perfil
     if (response.data.perfil) {

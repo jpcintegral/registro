@@ -9,6 +9,8 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
    const [dragend,setDdragend]= useState(true);
   const markersData = markersData_ || [];
 
+
+
   useEffect(() => {
     if (markersData.length > 1){
       setDdragend(false);
@@ -38,8 +40,24 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
             .then(markers => {
               markers.forEach(marker => {
                 if (marker) {
-                     
+                 
+
                   marker.addTo(map);
+                  if(dragend){
+                  const markerLatLng = marker.getLatLng(); // Obtener la posición del marcador
+                  const lat = markerLatLng.lat; // Obtener la latitud
+                  const lon = markerLatLng.lng; // Obtener la longitud
+
+                  centerMap(lat,lon, map);
+                  }
+                  const markersLatLng = markers.map(marker => ({
+                    lat: marker.getLatLng().lat,
+                    lon: marker.getLatLng().lng
+                   // street: street,
+                    //postalCode: postalCode 
+                  }));
+               
+                  onMapUpdate(markersLatLng);
                 }
               });
             })
@@ -87,24 +105,28 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
         const marker = L.marker([parseFloat(lat) + offset, parseFloat(lon) + offset], { draggable: dragend, icon: markerIcon });
       
         if (marker) {
-					 marker.bindPopup(`
-            <b>Nombre:</b> ${nombre}<br/>
-            <b>Edad:</b> ${edad}<br/>
-            <b>Estado:</b> ${state}<br/>
-            <b>Municipio:</b> ${municipality}<br/>
-            <b>Colonia:</b> ${neighborhood}<br/>
-            <b>Código Postal:</b> ${postalCode}<br/>
-            <b>Calle:</b> ${street}<br/>
-            <b>Número:</b> ${number}<br/>          
-          `);   
-		}
+            marker.bindPopup(`
+              <b>Nombre:</b> ${nombre}<br/>
+              <b>Estado:</b> ${state}<br/>
+              <b>Municipio:</b> ${municipality}<br/>
+              <b>Colonia:</b> ${neighborhood}<br/>
+              <b>Código Postal:</b> ${postalCode}<br/>
+              <b>Calle:</b> ${street}<br/>
+              <b>Número:</b> ${number}<br/>          
+            `);   
+	      	}
         marker.on("dragend", (event) => {
           const markerLatLng = event.target.getLatLng();
           const newLat = markerLatLng.lat;
           const newLon = markerLatLng.lng;
           onMapUpdate({ lat: newLat, lon: newLon, street: street, postalCode: postalCode });
         });
-
+        marker.on("click", (event) => {
+          const markerLatLng = event.target.getLatLng();
+          const newLat = markerLatLng.lat;
+          const newLon = markerLatLng.lng;
+          onMapUpdate({ lat: newLat, lon: newLon, street: street, postalCode: postalCode });
+        });
         return marker;
       } else {
         parametros = `q=${encodeURIComponent('mexico, Colima, colima, 28000' )}&bounded=1&limit=1`;
@@ -123,7 +145,6 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
         if (marker) {
 					 marker.bindPopup(`
             <b>Nombre:</b> ${nombre}<br/>
-            <b>Edad:</b> ${edad}<br/>
             <b>Estado:</b> ${state}<br/>
             <b>Municipio:</b> ${municipality}<br/>
             <b>Colonia:</b> ${neighborhood}<br/>
@@ -138,7 +159,12 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
           const newLon = markerLatLng.lng;         
           onMapUpdate({ lat: newLat, lon: newLon, street: street, postalCode: postalCode });
         });
-
+        marker.on("click", (event) => {
+          const markerLatLng = event.target.getLatLng();
+          const newLat = markerLatLng.lat;
+          const newLon = markerLatLng.lng;
+          onMapUpdate({ lat: newLat, lon: newLon, street: street, postalCode: postalCode });
+        });
         return marker;
       }
     } catch (error) {
@@ -180,7 +206,12 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
           const newLon = markerLatLng.lng;
           onMapUpdate({ lat: newLat, lon: newLon, street: street, postalCode: postalCode });
         });
-
+        marker.on("click", (event) => {
+          const markerLatLng = event.target.getLatLng();
+          const newLat = markerLatLng.lat;
+          const newLon = markerLatLng.lng;
+          onMapUpdate({ lat: newLat, lon: newLon, street: street, postalCode: postalCode });
+        });
         return marker;
       }
     } catch (error) {
@@ -188,6 +219,16 @@ const Map = ({ markersData_, width, height, onMapUpdate }) => {
     }
 
     return null;
+  };
+
+  const centerMap = (lat, lon, map_) => {
+    if (map_) { // Verificar si map está definido antes de usarlo
+      const currentBounds = map_.getBounds();
+      const newLatLng = L.latLng(lat, lon);
+      if (!currentBounds.contains(newLatLng)) {
+        map_.setView(newLatLng);
+      }
+    }
   };
 
   const mapStyle = {

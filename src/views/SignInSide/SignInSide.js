@@ -121,7 +121,7 @@ export default function SignInSide(props) {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              LOGIN
+              REGISTRO
             </Typography>
             <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
               <TextField
@@ -149,7 +149,7 @@ export default function SignInSide(props) {
                 label="Remember me"
               />
               <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                Sign In
+                Entrar
               </Button>
             {/*  <Grid container>
                 <Grid item xs>
@@ -170,7 +170,7 @@ export default function SignInSide(props) {
         </Grid>
       </Grid>
       <Snackbar
-        place="br"
+        place="tc"
         color="danger"
         message={mensaje}
         open={bc}

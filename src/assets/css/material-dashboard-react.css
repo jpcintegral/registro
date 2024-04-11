@@ -563,7 +563,7 @@ footer ul li a:hover {
 .description {
   font-size: 13px;
   margin-bottom: 1px;
-  line-height: 0.5em;
+  line-height: 1em;
 }
 @media print {
   .hide-on-print {
@@ -575,16 +575,18 @@ footer ul li a:hover {
   width: auto; /* Ancho deseado */
   height: 230px; /* Alto deseado */
   overflow: hidden; /* Para ocultar cualquier parte de la imagen que se salga del contenedor */
+  text-align: center;
 }
 
 .img-container img {
   width: auto; /* Se ajustará automáticamente para mantener la relación de aspecto */
   height: 100%; /* Se ajustará automáticamente para mantener la relación de aspecto */
   object-fit: cover; /* La imagen se ajustará para cubrir el contenedor sin distorsión */
+  
 }
 
 .img-elector{
-  width:400px;
+  width:100%;
 }
 
 .input-file{

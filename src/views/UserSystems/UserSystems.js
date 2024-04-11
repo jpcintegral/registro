@@ -15,7 +15,6 @@ import Modal from "components/Modal/Modal.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 //import avatar from "assets/img/faces/jpc.jpg";
 import { ShimmerTable } from "react-shimmer-effects";
-import PropTypes from "prop-types";
 import EditIcon from '@material-ui/icons/Edit';
 import Visibility from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -70,6 +69,7 @@ const estatusMap = {
     "3": "Otro"
     }
 export default function UserSystems() {
+  const url=process.env.REACT_APP_API_URL;
   const admin= process.env.REACT_APP_ADMIN;
   const key = process.env.REACT_APP_SECRET_KEY;  
   const history = useHistory();
@@ -86,7 +86,7 @@ export default function UserSystems() {
  
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:3800/api/users");
+      const response = await axios.get(`${url}/api/users`);
       setUsers(response.data);
       setLoading(false);
     } catch (error) {
@@ -95,7 +95,7 @@ export default function UserSystems() {
   };
   const getEstados = async () =>{
     try {
-      const responseEstados= await axios.get("http://localhost:3800/api/estados");
+      const responseEstados= await axios.get(`${url}/api/estados`);
       setEstadosList(responseEstados.data);
       setLoading(false);
     } catch(error) {
@@ -105,7 +105,7 @@ export default function UserSystems() {
 
    const getMunicipos = async () =>{
     try {
-      const responseMunicipios= await axios.get("http://localhost:3800/api/municipios");
+      const responseMunicipios= await axios.get(`${url}/api/municipios`);
       setMunicipiosList(responseMunicipios.data);
       setLoading(false);
     } catch(error) {
@@ -168,7 +168,6 @@ export default function UserSystems() {
     setOpenModal(false);
   };
   const handleDetail = (userId) => {
-    console.log(userId);
     const detalleUsuario = users.find(user => user._id === userId);
     setDetalleUsuario(detalleUsuario);
     handleOpenModal();
@@ -196,7 +195,7 @@ export default function UserSystems() {
   }
   const handleDelete = async (userId) => {
     try {
-      await axios.put(`http://localhost:3800/api/user/desactivar/${userId}/${idUsuarioBaja}`);
+      await axios.put(`${url}/api/user/desactivar/${userId}/${idUsuarioBaja}`);
       const updatedUsers = users.filter(user => user._id !== userId);
       setUsers(updatedUsers);
     } catch (error) {
@@ -247,8 +246,8 @@ export default function UserSystems() {
           <CardHeader color="info">
             <h4 className={classes.cardTitleWhite}>  Lista de usuarios registrados</h4>
             <p >
-            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredUsers)} disabled={admin !== perfil}><FileDownload/>Descargar Tabla</Button>
-            <Button color="primary" size="sm" onClick={() => exportToExcelBase(users)} disabled={admin !== perfil}><FileDownload/>Descargar Base</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelFilter(filteredUsers)} disabled={admin != perfil}><FileDownload/>Descargar Tabla</Button>
+            <Button color="primary" size="sm" onClick={() => exportToExcelBase(users)} disabled={admin != perfil}><FileDownload/>Descargar Base</Button>
             </p>
           </CardHeader>
           <CardBody>
@@ -296,7 +295,7 @@ export default function UserSystems() {
                 <React.Fragment key={user._id}>
                   <Button color="primary" size="sm" onClick={() => handleDetail(user._id)}><Visibility/></Button>
                   <Button color="primary" size="sm" onClick={() => handleUpdate(user._id)}><EditIcon/></Button>
-                  <Button color="primary" size="sm" onClick={() => handleDelete(user._id)} disabled={admin !== perfil}><DeleteIcon/></Button>
+                  <Button color="primary" size="sm" onClick={() => handleDelete(user._id)} disabled={admin != perfil}><DeleteIcon/></Button>
                 </React.Fragment>
               ])}
             />
@@ -329,7 +328,7 @@ export default function UserSystems() {
                 </div>
               </React.Fragment>
             )}
-        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF} disabled={admin !== perfil}>
+        <Button color="primary" size="sm"  className="hide-on-print" onClick={printUserDetailToPDF} disabled={admin != perfil}>
           Imprimir
         </Button>
              
@@ -342,9 +341,4 @@ export default function UserSystems() {
   );
 
 }
-  // Definir PropTypes para las props
-  UserSystems.propTypes = {
-    userId: PropTypes.string.isRequired,
-    perfil: PropTypes.number.isRequired,
-  };
 

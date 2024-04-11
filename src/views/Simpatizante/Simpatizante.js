@@ -57,6 +57,7 @@ const styles = {
 const useStyles = makeStyles(styles);
 
 export default function Simpatizante() {
+  const url=process.env.REACT_APP_API_URL;
   const key = process.env.REACT_APP_SECRET_KEY;  
   const history = useHistory();
   const classes = useStyles();
@@ -118,7 +119,7 @@ export default function Simpatizante() {
 
         if (userId && userId !== ":userId") {
           setLoading(true);
-          axios.get(`http://localhost:3800/api/simpatizantes/${userId}`)
+          axios.get(`${url}/api/simpatizantes/${userId}`)
             .then(response => {
               const simpatizanteData = response.data;
               setFormData(simpatizanteData);
@@ -135,7 +136,7 @@ export default function Simpatizante() {
         // Método para obtener los estados desde la API
         async function obtenerEstados() {
           try {
-            const response = await axios.get('http://localhost:3800/api/estados');
+            const response = await axios.get(`${url}/api/estados`);
             return response.data.map((estado) => ({ idEstado: estado.idEstado, nombre: estado.nombre }));
           } catch (error) {
             console.error('Error al obtener los estados:', error);
@@ -203,7 +204,7 @@ export default function Simpatizante() {
     try {
       formData.idUsuarioAlta=idUsuarioAlta;
       // console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
-      const response = await axios.post(`http://localhost:3800/api/simpatizantes`, formData);
+      const response = await axios.post(`${url}/api/simpatizantes`, formData);
       return response.data; // Devuelve los datos del nuevo simpatizante creado
     } catch (error) {
       console.error("Error al insertar simpatizante:", error);
@@ -216,7 +217,7 @@ export default function Simpatizante() {
     try {
       formData.idUsuarioUpdate=idUsuarioUpdate;
       //console.log("formData.imgElectorFrontal;",formData.imgElectorFrontal);
-      const response = await axios.put(`http://localhost:3800/api/simpatizantes/${userId}`, formData);
+      const response = await axios.put(`${url}/api/simpatizantes/${userId}`, formData);
       return response.data; // Devuelve los datos del simpatizante actualizado
     } catch (error) {
       console.error("Error al actualizar simpatizante:", error);
@@ -227,7 +228,7 @@ export default function Simpatizante() {
 // Método para obtener los municipios de un estado específico desde la API
 async function obtenerMunicipios(idEstado) {
   try {
-    const response = await axios.get(`http://localhost:3800/api/municipios/${idEstado}`);
+    const response = await axios.get(`${url}/api/municipios/${idEstado}`);
     return response.data.map((municipio) => ({ idMunicipio: municipio.idMunicipio, nombre: municipio.nombre }));
   } catch (error) {
     console.error('Error al obtener los municipios:', error);
@@ -264,6 +265,7 @@ async function cargarMunicipios(idEstado) {
  
  const handleSubmit = async (e) => {
   e.preventDefault();
+  setSpinner(true)
 
   try {
     // Validar que todos los campos obligatorios estén llenos
@@ -284,8 +286,10 @@ async function cargarMunicipios(idEstado) {
         history.push("/admin/Simpatizantes");      
       }
     }
+    setSpinner(false)
   } catch (error) {
     console.error("Error:", error);
+    setSpinner(false)
   }
 }
 
@@ -359,12 +363,14 @@ const handleInputChange = (e) => {
 
   const handleMapUpdate = (updatedMarkersData) => {
     // Actualiza el estado con los datos actualizados del mapa
+    if (updatedMarkersData.lat !== undefined && updatedMarkersData.lon !== undefined){
     setFormData(prevFormData => ({
       ...prevFormData,
       lat: updatedMarkersData.lat,
       lon: updatedMarkersData.lon
     }));
     console.log("updatedMarkersData:",updatedMarkersData);
+  }
   };
 
 
@@ -496,7 +502,7 @@ const handleInputChange = (e) => {
     const rightKeys = keys.slice(middleIndex);
   
     return (
-      <GridItem container spacing={2}>
+      <GridItem container spacing={8}>
         <GridItem item xs={6}>
           <List>
             {leftKeys.map((key) => (
@@ -534,7 +540,7 @@ const handleInputChange = (e) => {
 
    const { value, checked } = event.target; 
       try {
-    
+     
       setCheckedFields((prevCheckedFields) => ({
         ...prevCheckedFields,
         [value]: checked
