@@ -219,7 +219,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="primary">
+            <CardHeader color="info">
               <ChartistGraph
                 className="ct-chart"
                 data={edadSimpatizantesChart.data}
@@ -274,7 +274,7 @@ export default function Dashboard() {
 
         <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="warning">
+            <CardHeader color="info">
               <ChartistGraph
                 className="ct-chart"
                 data={completedTasksChart.data}
@@ -340,7 +340,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card>
-            <CardHeader color="warning">
+            <CardHeader color="info">
               <h4 className={classes.cardTitleWhite}>Employees Stats</h4>
               <p className={classes.cardCategoryWhite}>
                 New employees on 15th September, 2016
