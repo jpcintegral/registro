@@ -46,15 +46,15 @@ import {
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 
 const data = [
-  { value: 5, label: 'seccion 1' },
-  { value: 10, label: 'seccion 2' },
-  { value: 15, label: 'seccion 3' },
-  { value: 20, label: 'seccion 4' },
+  { value: 5, label: 'sección 1' },
+  { value: 10, label: 'sección 2' },
+  { value: 15, label: 'sección 3' },
+  { value: 20, label: 'sección 4' },
 ];
 
 const size = {
-  width: 500,
-  height: 200,
+  width: 390,
+  height: 250,
 };
 const StyledText = styled('text')(({ theme }) => ({
   fill: theme.palette.text.primary,
@@ -167,7 +167,9 @@ export default function Dashboard() {
               paddingAngle: 3,
               cornerRadius: -7,
                data,
-                innerRadius: 50 }]} {...size}>
+                innerRadius: 70,
+                
+             }]}{...size}>
           <PieCenterLabel>Simpatizantes</PieCenterLabel>
         </PieChart>
             </CardHeader>
@@ -217,7 +219,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="info">
+            <CardHeader color="primary">
               <ChartistGraph
                 className="ct-chart"
                 data={edadSimpatizantesChart.data}
@@ -244,7 +246,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="info">
+            <CardHeader color="success">
               <ChartistGraph
                 className="ct-chart"
                 data={emailsSubscriptionChart.data}
@@ -272,7 +274,7 @@ export default function Dashboard() {
 
         <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="info">
+            <CardHeader color="warning">
               <ChartistGraph
                 className="ct-chart"
                 data={completedTasksChart.data}
