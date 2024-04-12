@@ -11,20 +11,25 @@ import Hidden from "@material-ui/core/Hidden";
 import Poppers from "@material-ui/core/Popper";
 import Divider from "@material-ui/core/Divider";
 // @material-ui/icons
-import Person from "@material-ui/icons/Person";
+
 import Notifications from "@material-ui/icons/Notifications";
 import Dashboard from "@material-ui/icons/Dashboard";
+import { useHistory } from 'react-router-dom';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 //import Search from "@material-ui/icons/Search";
 // core components
 //import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
 
 import styles from "assets/jss/material-dashboard-react/components/headerLinksStyle.js";
+//import { useHistory } from "react-router-dom";
+
 
 const useStyles = makeStyles(styles);
 
 export default function AdminNavbarLinks() {
   const classes = useStyles();
+  const history = useHistory();
   const [openNotification, setOpenNotification] = React.useState(null);
   const [openProfile, setOpenProfile] = React.useState(null);
   const handleClickNotification = (event) => {
@@ -45,9 +50,50 @@ export default function AdminNavbarLinks() {
     }
   };
   const handleCloseProfile = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    
+    // Recuperar el valor actual de la cookie token
+const token = getCookie("token");
+    console.log(token);
+      // Modificar el valor de la cookie token
+    if (token) {
+      // Realizar cualquier modificación necesaria en el valor del token
+      const nuevoToken = "eliminar";
+
+      // Establecer la nueva cookie con el valor modificado
+      setCookie("token", nuevoToken); 
+    }
+   
     setOpenProfile(null);
+    history.push("/");
   };
+
+
+  // Función para recuperar una cookie por su nombre
+const getCookie = (name) => {
+  const cookieName = name + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookieArray = decodedCookie.split(";");
+
+  for (let i = 0; i < cookieArray.length; i++) {
+    let cookie = cookieArray[i];
+    while (cookie.charAt(0) === " ") {
+      cookie = cookie.substring(1);
+    }
+    if (cookie.indexOf(cookieName) === 0) {
+      return cookie.substring(cookieName.length, cookie.length);
+    }
+  }
+  return null; // Si no se encuentra la cookie, devuelve null
+};
+
+// Función para establecer una cookie con un nuevo valor
+const setCookie = (name, value) => {
+  const expirationDate = new Date(0); // Establecer la fecha de expiración en el pasado
+  const expires = "expires=" + expirationDate.toUTCString();
+  document.cookie = name + "=; " + value + ";" +expires + "; path=/";
+};
+  
+
   return (
     <div>
       {/*
@@ -170,9 +216,10 @@ export default function AdminNavbarLinks() {
           onClick={handleClickProfile}
           className={classes.buttonLink}
         >
-          <Person className={classes.icons} />
+          <ExitToAppIcon className={classes.icons}/>
+        
           <Hidden mdUp implementation="css">
-            <p className={classes.linkText}>Profile</p>
+            <p className={classes.linkText}>Cerrar</p>
           </Hidden>
         </Button>
         <Poppers
@@ -210,14 +257,16 @@ export default function AdminNavbarLinks() {
                     >
                       Settings
                     </MenuItem>
-                   */}
+                   
                     <Divider light />
+                    */}
                     <MenuItem
                       onClick={handleCloseProfile}
                       className={classes.dropdownItem}
                       >
                       SALIR
                     </MenuItem>
+                    <Divider light />
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
