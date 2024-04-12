@@ -1,6 +1,10 @@
 import React from "react";
 // react plugin for creating charts
 import ChartistGraph from "react-chartist";
+import { PieChart } from '@mui/x-charts/PieChart';
+import { useDrawingArea } from '@mui/x-charts/hooks';
+import { styled } from '@mui/material/styles';
+
 // @material-ui/core
 import { makeStyles } from "@material-ui/core/styles";
 //import Icon from "@material-ui/core/Icon";
@@ -41,10 +45,36 @@ import {
 
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 
+const data = [
+  { value: 5, label: 'seccion 1' },
+  { value: 10, label: 'seccion 2' },
+  { value: 15, label: 'seccion 3' },
+  { value: 20, label: 'seccion 4' },
+];
+
+const size = {
+  width: 500,
+  height: 200,
+};
+const StyledText = styled('text')(({ theme }) => ({
+  fill: theme.palette.text.primary,
+  textAnchor: 'middle',
+  dominantBaseline: 'central',
+  fontSize: 20,
+}));
 const useStyles = makeStyles(styles);
 
 export default function Dashboard() {
   const classes = useStyles();
+
+  function PieCenterLabel({ children }: { children: React.ReactNode }) {
+    const { width, height, left, top } = useDrawingArea();
+    return (
+      <StyledText x={left + width / 2} y={top + height / 2}>
+        {children}
+      </StyledText>
+    );
+  }
   return (
     <div>
       <GridContainer>
@@ -72,8 +102,8 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} sm={6} md={4}>
           <Card>
-            <CardHeader color="primary" stats icon>
-              <CardIcon color="primary">
+            <CardHeader color="info" stats icon>
+              <CardIcon color="info">
                 <GirlIcon />
               </CardIcon>
               <p className={classes.cardCategory}>Total de mujeres</p>
@@ -128,9 +158,39 @@ export default function Dashboard() {
         */}
       </GridContainer>
       <GridContainer>
+
+      <GridItem xs={12} sm={12} md={6}>
+          <Card chart>
+            <CardHeader >
+            <PieChart series={[{
+              arcLabel: (item) => `(${item.value})`,
+              paddingAngle: 3,
+              cornerRadius: -7,
+               data,
+                innerRadius: 50 }]} {...size}>
+          <PieCenterLabel>Simpatizantes</PieCenterLabel>
+        </PieChart>
+            </CardHeader>
+            <CardBody>
+              <h4 className={classes.cardTitle}>Datos simpatizantes</h4>
+              <p className={classes.cardCategory}>
+                <span className={classes.successText}>
+                  <ArrowUpward className={classes.upArrowCardCategory} /> 55%
+                </span>{" "}
+                 Incremento de simpatizantes.
+              </p>
+            </CardBody>
+            <CardFooter chart>
+              <div className={classes.stats}>
+                <AccessTime /> ultima actualización 2 dias atras
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+
         <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="success">
+            <CardHeader color="info">
               <ChartistGraph
                 className="ct-chart"
                 data={dailySalesChart.data}
@@ -182,9 +242,9 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={12} md={12}>
+        <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="warning">
+            <CardHeader color="info">
               <ChartistGraph
                 className="ct-chart"
                 data={emailsSubscriptionChart.data}
@@ -210,9 +270,9 @@ export default function Dashboard() {
           </Card>
         </GridItem>
 
-        <GridItem xs={12} sm={12} md={12}>
+        <GridItem xs={12} sm={12} md={6}>
           <Card chart>
-            <CardHeader color="danger">
+            <CardHeader color="info">
               <ChartistGraph
                 className="ct-chart"
                 data={completedTasksChart.data}
@@ -238,7 +298,7 @@ export default function Dashboard() {
         <GridItem xs={12} sm={12} md={6}>
           <CustomTabs
             title="Tasks:"
-            headerColor="primary"
+            headerColor="info"
             tabs={[
               {
                 tabName: "Bugs",
