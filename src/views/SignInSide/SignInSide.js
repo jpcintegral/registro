@@ -38,10 +38,7 @@ export default function SignInSide(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    
     const isLogin = await props.handleLogin( data.get("email"), data.get("password")); 
     if (!isLogin) {
       showNotification("bc",'datos incorrectos'); // Mostrar la notificación si el inicio de sesión falla
