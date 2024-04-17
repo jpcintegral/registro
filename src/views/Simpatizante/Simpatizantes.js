@@ -77,7 +77,13 @@ export default function Simpatizantes() {
 
   const fetchSimpatizantes = async () => {
     try {
-      const response = await axios.get(`${url}/api/getActiveSimpatizantesExcludingImages`);
+      const token = getCookie("token"); // Suponiendo que tengas una función para obtener la cookie del token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` // Añade el token al encabezado de autorización
+        }
+      };
+      const response = await axios.get(`${url}/api/getActiveSimpatizantesExcludingImages`,config);
       setSimpatizantes(response.data);
       setLoading(false);
     } catch (error) {
@@ -105,7 +111,13 @@ export default function Simpatizantes() {
 
    const getSimpatizante = async (idSimpatiZante) => {
     try {
-      await axios.get(`${url}/api/simpatizantes/${idSimpatiZante}`)
+      const token = getCookie("token"); // Suponiendo que tengas una función para obtener la cookie del token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` // Añade el token al encabezado de autorización
+        }
+      };
+      await axios.get(`${url}/api/simpatizantes/${idSimpatiZante}`,config)
       .then(response => {      
         setDetalleUsuario(response.data);  
         setSpinner(false);  
@@ -192,7 +204,13 @@ export default function Simpatizantes() {
   const handleDelete = async (simpatizanteId) => {
     setSpinner(true);
     try {
-      await axios.put(`${url}/api/simpatizantes/desactivar/${simpatizanteId}/${idUsuarioBaja}`);
+      const token = getCookie("token"); // Suponiendo que tengas una función para obtener la cookie del token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` // Añade el token al encabezado de autorización
+        }
+      };
+      await axios.put(`${url}/api/simpatizantes/desactivar/${simpatizanteId}/${idUsuarioBaja}`,config);
       const updatedSimpatizantes = simpatizantes.filter(simpatizante => simpatizante._id !== simpatizanteId);
       setSimpatizantes(updatedSimpatizantes);
       setSpinner(false);

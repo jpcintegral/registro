@@ -86,7 +86,13 @@ export default function UserSystems() {
  
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${url}/api/users`);
+      const token = getCookie("token"); // Suponiendo que tengas una función para obtener la cookie del token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` // Añade el token al encabezado de autorización
+        }
+      };
+      const response = await axios.get(`${url}/api/users`,config);
       setUsers(response.data);
       setLoading(false);
     } catch (error) {
@@ -195,7 +201,13 @@ export default function UserSystems() {
   }
   const handleDelete = async (userId) => {
     try {
-      await axios.put(`${url}/api/user/desactivar/${userId}/${idUsuarioBaja}`);
+      const token = getCookie("token"); // Suponiendo que tengas una función para obtener la cookie del token
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` // Añade el token al encabezado de autorización
+        }
+      };
+      await axios.put(`${url}/api/user/desactivar/${userId}/${idUsuarioBaja}`,config);
       const updatedUsers = users.filter(user => user._id !== userId);
       setUsers(updatedUsers);
     } catch (error) {
